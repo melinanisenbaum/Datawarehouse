@@ -1,0 +1,17 @@
+/*@import url("https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css");
+@import url('https://fonts.googleapis.com/css2?family=Source+Sans+Pro:ital,wght@0,300;0,400;0,600;1,200&display=swap');*/
+
+body {
+    font-family: 'Source Sans Pro', sans-serif;
+}
+
+.login-container {
+    margin-top: 150px;
+}
+.nav-tabs {
+    display: none;
+}
+.app-container {
+    display: none;
+    margin-top: 80px;
+}

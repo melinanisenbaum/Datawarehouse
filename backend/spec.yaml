@@ -1,0 +1,832 @@
+openapi: '3.0.2'
+info:
+  title: Data Warehouse API Rest
+  version: '1.0.0'
+servers:
+  - description: Development server
+    url: https://localhost:3300
+paths:
+  /login:
+    post:
+      summary: login a user
+      operationId: login
+      description: By sending a complete form, the user can login into the system
+      requestBody:
+        required: true
+        content:
+          application/w-www-form-urlencoded: 
+            schema:
+              $ref: '#/components/schemas/user/email'
+              $ref: '#/components/schemas/user/passwd'
+      responses:
+        '200':
+          description: The loggin was successfull
+        '400':
+          description: The username or password is incorrect
+  /users:
+    get:
+      summary: returns a list of users
+        operationId: getUsers
+        description: Gets a list of active users
+        responses:
+          '200':
+            description: succesfull request
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/arrayOfUsers'
+    post:
+      summary: Creates a new user
+      operationId: createUser
+      description: By sending a complete form, the user can register in the system
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/user'
+      responses: 
+        '201':
+          description: the user has been created
+        '400':
+          description: invalid input, object invalid
+        '409':
+          description: the present user already exists
+  /users/:userId:
+    get:
+      summary: returns the user account by id
+      operationId: getUser
+      description: Gets an individual user in the system and returns the account information
+      parameters:
+        - $ref: '#/components/parameters/userId'
+      responses:
+        '200':
+          description: the account is available
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/user'
+        '404':
+          description: The specified user was not found
+    put:
+      summary: Updates an existing user
+      operationId: updateUser
+      description: updates a particular user account in the system.
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/user'
+      parameters:
+        - $ref: '#/components/parameters/userId'
+      responses:
+        '200':
+          description: the update has been succesfull
+        '400':
+          description: the account could not been updated
+    delete:
+      summary: deletes an existing user account with the specified id
+      operationId: deleteUser
+      description: deletes an individual user information and id in the system.
+      responses:
+        '200':
+          description: user :id has been deleted
+        '404':
+          description: The account does not exist
+        '409':
+          description: server conflict. The account cannot be deleted in this moment
+  /contacts:
+    get:
+      summary: Returns a list of contacts
+      operationId: getContacts
+      description: Returns a list of contacts. By the filter you can select contacts by a query
+      parameters:
+        - $ref: '#/components/parameters/filter'
+      responses:
+        '200':
+          description: returns results matching criteria
+          content:
+            application/json:
+              schema: 
+                $ref: '#/components/schemas/arrayOfContacts'
+        '400':
+          description: bad input parameter
+        '403':
+          description: unauthorized request
+        '404':
+          description: users with the specified query were not found
+    post:
+      summary: Creates a new contact
+      operationId: createContact
+      description: By sending a complete form, the user can create a new contact in system
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/contact'
+      responses: 
+        '201':
+          description: the contct has been created
+        '400':
+          description: invalid input, object invalid
+        '409':
+          description: the contact already exists
+  /contacts/:contactId:
+    get:
+      summary: returns the contact account by id
+      operationId: getContact#
+      description: Gets an individual contact in the system and returns the account information
+      parameters:
+        - $ref: '#/components/parameters/id'
+      responses:
+        '200':
+          description: the account is available
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/contact'
+        '404':
+          description: The specified contact was not found
+    put:
+      summary: Updates an existing contact
+      operationId: updateContact
+      description: updates a particular contact account in the system.
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/contact'
+      parameters:
+        - $ref: '#/components/parameters/id'
+      responses:
+        '200':
+          description: the update has been succesfull
+        '400':
+          description: the account could not been updated
+    delete:
+      summary: deletes an existing account with the specified id
+      operationId: deleteContact
+      description: deletes an individual contact information and id in the system.
+      responses:
+        '200':
+          description: Contact :id has been deleted
+        '404':
+          description: The account does not exist
+        '409':
+          description: server conflict. The account cannot be deleted in this moment.
+  /channels:
+    get:
+      summary: Returns a list of channels.
+      operationId: getChannels
+      responses:
+        '200':
+          description: returns results matching criteria
+          content:
+            multipart/form-data:
+              schema: 
+                $ref: '#/components/schemas/arrayOfChannels'
+        '400':
+          description: bad input parameter
+        '404':
+          description: products with the specified query parameter were not found
+    post:
+      summary: Creates a new channel
+      operationId: createChannel
+      description: By sending a query parameter, the user can create a new channel in system
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/channel'
+      responses: 
+        '201':
+          description: the channel has been created
+        '400':
+          description: invalid input, object invalid
+        '409':
+          description: the channel already exists
+  /channels/:channelId:
+    get:
+      summary: Returns an specified of channel.
+      operationId: getChannel
+      responses:
+        '200':
+          description: returns results matching criteria
+          content:
+            multipart/form-data:
+              schema: 
+                $ref: '#/components/schemas/channel'
+        '404':
+          description: products with the specified query parameter were not found
+    delete:
+      summary: deletes an existing channel with the specified id
+      operationId: deleteChannel
+      description: deletes an individual channel information and id in the system.
+      responses:
+        '200':
+          description: channel :id has been deleted
+        '404':
+          description: The channel does not exist
+        '409':
+          description: server conflict. The channel cannot be deleted in this moment.
+  /regions:
+    get:
+      summary: Returns a list of regions.
+      operationId: getRegions
+      responses:
+        '200':
+          description: returns results matching criteria
+          content:
+            multipart/form-data:
+              schema: 
+                $ref: '#/components/schemas/arrayOfRegions'
+        '400':
+          description: bad input parameter
+        '404':
+          description: products with the specified query parameter were not found
+    post:
+      summary: Creates a new region
+      operationId: createRegion
+      description: By sending a query parameter, the user can create a new region in system
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/region'
+      responses: 
+        '201':
+          description: the region has been created
+        '400':
+          description: invalid input, object invalid
+        '409':
+          description: the contact already exists
+  /region/:id:
+    get:
+      summary: Returns an specified of regions.
+      operationId: getRegion
+      responses:
+        '200':
+          description: returns results matching criteria
+          content:
+            multipart/form-data:
+              schema: 
+                $ref: '#/components/schemas/region'
+        '404':
+          description: products with the specified query parameter were not found
+    delete:
+      summary: deletes an existing region with the specified id
+      operationId: deleteRegion
+      description: deletes an individual contact information and id in the system.
+      responses:
+        '200':
+          description: Contact :id has been deleted
+        '404':
+          description: The account does not exist
+        '409':
+          description: server conflict. The account cannot be deleted in this moment.
+  /region/country:
+    get:
+      summary: Returns a list of countries for a selected region.
+      operationId: getCountry
+      responses:
+        '200':
+          description: returns results matching criteria
+          content:
+            multipart/form-data:
+              schema: 
+                $ref: '#/components/schemas/arrayOfCountries'
+        '400':
+          description: bad input parameter
+        '404':
+          description: products with the specified query parameter were not found
+    post:
+      summary: Creates a new country
+      operationId: createCountry
+      description: By sending a query parameter, the user can create a new country in system
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/country'
+      responses: 
+        '201':
+          description: the country has been created
+        '400':
+          description: invalid input, object invalid
+        '409':
+          description: the contact already exists
+  /region/country/:id:
+    get:
+      summary: Returns an specified country.
+      operationId: getCountry
+      responses:
+        '200':
+          description: returns results matching criteria
+          content:
+            multipart/form-data:
+              schema: 
+                $ref: '#/components/schemas/country'
+        '404':
+          description: products with the specified query parameter were not found
+    delete:
+      summary: deletes an existing country with the specified id
+      operationId: deleteCountry
+      description: deletes an individual country in the system.
+      responses:
+        '200':
+          description: country :id has been deleted
+        '404':
+          description: The item does not exist
+        '409':
+          description: server conflict. The account cannot be deleted in this moment.
+  /region/country/city:
+    get:
+      summary: Returns a list of cities belongin to an specific country.
+      operationId: getCity
+      responses:
+        '200':
+          description: returns results matching criteria
+          content:
+            multipart/form-data:
+              schema: 
+                $ref: '#/components/schemas/arrayOfCities'
+        '400':
+          description: bad input parameter
+        '404':
+          description: products with the specified query parameter were not found
+    post:
+      summary: Creates a new city
+      operationId: createCity
+      description: By sending a query parameter, the user can create a new city in system
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/city'
+      responses: 
+        '201':
+          description: A new city has been created
+        '400':
+          description: invalid input, object invalid
+        '409':
+          description: the contact already exists
+  /region/country/city/:id:
+    get:
+      summary: Returns an specified city.
+      operationId: getCity
+      responses:
+        '200':
+          description: returns results matching criteria
+          content:
+            multipart/form-data:
+              schema: 
+                $ref: '#/components/schemas/city'
+        '404':
+          description: The item was not found
+    delete:
+      summary: deletes an existing city with the specified id
+      operationId: deleteCity
+      description: deletes an individual city in the system.
+      responses:
+        '200':
+          description: The itrm has been deleted
+        '404':
+          description: The item does not exist
+        '409':
+          description: server conflict. The account cannot be deleted in this moment.
+  /companies:
+    get:
+      summary: Returns a list of companies
+      operationId: getCompanies
+      description: Returns a list of companies. By the filter you can select contacts by a query
+      parameters:
+        - $ref: '#/components/parameters/filter'
+      responses:
+        '200':
+          description: returns results matching criteria
+          content:
+            application/json:
+              schema: 
+                $ref: '#/components/schemas/arrayOfCompanies'
+        '400':
+          description: bad input parameter
+        '404':
+          description: users with the specified query were not found
+        '504':
+          description: server error
+    post:
+      summary: Creates a new company
+      operationId: createCompany
+      description: By sending a complete form, the user can create a new company in system
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/company'
+      responses: 
+        '201':
+          description: the company has been created
+        '400':
+          description: invalid input, object invalid
+        '409':
+          description: the company already exists
+  /companies/:companyId:
+    delete:
+      summary: deletes an existing company with the specified id
+      operationId: deleteCompany
+      description: deletes an individual company in the system.
+      responses:
+        '200':
+          description: The item has been deleted
+        '404':
+          description: The item does not exist
+        '409':
+          description: server conflict. The account cannot be deleted in this moment.
+    put:
+      summary: Updates an existing company
+      operationId: updateCompany
+      description: updates a particular company account in the system.
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/company'
+      parameters:
+        - $ref: '#/components/parameters/companyId'
+      responses:
+        '200':
+          description: the update has been succesfull
+        '400':
+          description: the account could not been updated
+components:
+  schemas:
+    user:
+      type: object
+      required:
+      - name
+      - lastname
+      - email
+      - password
+      properties:
+        userId:
+          type: integer
+          example: 51
+        name:
+          type: string
+          example: Florencia
+        lastname:
+          type: string
+          example: Garcia
+        email:
+          type: string
+          format: email
+          example: florg@gmail.com
+        phone:
+          type: string
+          example: +54223583759
+        adress:
+          type: string
+          example: Los pinos 4954
+        role:
+          type: string
+          example: admin
+        password:
+          type: string
+          example: jhgjjfgsejgjd
+    contact:
+      type: object
+      required:
+      - id
+      - name
+      - lastname
+      - charge
+      - email
+      - company
+      properties:
+        id:
+          type: integer
+          example: 51
+        img:
+          type: string
+          format: binary
+        name:
+          type: string
+          example: florgarcia
+        lastname:
+          type: string 
+          example: Melina Nisenbaum
+        charge:
+          type: string
+          example: UX Designer
+        email:
+          type: string
+          format: email
+          example: melina@melina.com
+        company:
+          type: string
+          example: Naranja 
+        region:
+          type: string
+          example: Latam
+        country:
+          type: string
+          example: Argentina
+        city:
+          type: string
+          example: Mar del Plata
+        adress:
+          type: string
+          example: Los pinos 4954
+        phone-number:
+          type: string
+          example: +54223583759
+        interest:
+          type: integer
+          example: 75
+        channel:
+          type: string
+          example: email
+        contactAccount:
+          type: string
+          example: 0333 4890 2998
+        preferences:
+          type: string
+          example: favourite channel
+    company:
+      type: object
+      required:
+      - id
+      - name
+      - email
+      - region
+      - country
+      - city
+      - adress
+      - phone-number
+      properties:
+        id:
+          type: integer
+          example: 51
+        name:
+          type: string
+          example: Naranja
+        email:
+          type: string
+          format: email
+          example: melina@melina.com
+        region:
+          type: string
+          example: Latam
+        country:
+          type: string
+          example: Argentina
+        city:
+          type: string
+          example: Mar del Plata
+        adress:
+          type: string
+          example: Los pinos 4954
+        phone-number:
+          type: string
+          example: +54223583759
+    channel:
+      type: object
+      required:
+        - id
+        - name
+      properties:
+        id:
+          type: integer
+          example: 51
+        name:
+          type: string
+          example: messenger
+    region:
+      type: object
+      required:
+        - id
+        - name
+      properties:
+        id:
+          type: integer
+          example: 51
+        name:
+          type: string
+          example: Sudamérica
+    country:
+      type: object
+      required:
+        - id
+        - name
+        - region
+      properties:
+        id:
+          type: integer
+          example: 51
+        name:
+          type: string
+          example: Argentina
+        region:
+          type: string
+          example: Sudamérica
+    city:
+      type: object
+      required:
+        - id
+        - name
+        - country
+      properties:
+        id:
+          type: integer
+          example: 51
+        name:
+          type: string
+          example: Mar del Plata
+        country:
+          type: string
+          example: Argentina
+    arrayOfChannels:
+      type: array
+      items:
+        type: object
+        properties:
+          name:
+            type: string
+            example: phone 
+    arrayOfRegions:
+      type: array
+      items:
+        type: object
+        properties:
+          name:
+            type: string
+            example: Sudamérica 
+    arrayOfCountries:
+      type: array
+      items:
+        type: object
+        properties:
+          name:
+            type: string
+            example: Argentina
+    arrayOfCities:
+      type: array
+      items:
+        type: object
+        properties:
+          name:
+            type: string
+            example: Mar del Plata
+    arrayOfCompanies:
+      type: array
+      items:
+        type: object
+        properties:
+          id:
+            type: integer
+            example: 51
+          name:
+            type: string
+            example: Melina Nisenbaum
+          email:
+            type: string
+            format: email
+            example: melina@melina.com
+          Country:
+            type: string
+            example: Argentina
+          Region:
+            type: string
+            example: Latam
+          city:
+            type: string
+            example: Mar del Plata
+          adress:
+            type: string
+            example: Los pinos 4954
+          phone-number:
+            type: string
+            example: +54223583759
+    arrayOfContacts:
+      type: array
+      items:
+        type: object
+        properties:
+          fullname:
+            type: string
+            example: Melina Nisenbaum
+          email:
+            type: string
+            format: email
+            example: melina@melina.com
+          Country:
+            type: string
+            example: Argentina
+          Region:
+            type: string
+            example: Latam
+          company:
+            type: string
+            example: Ecom Experts
+          charge:
+            type: string
+            example: Ux Designer
+          region:
+            type: string
+            example: Latam
+          channel:
+            type: string
+            example: Whatssap
+          interest:
+            type: integer
+            example: 50
+    arrayOfUsers:
+      type: array
+      items:
+        type: object
+        properties:
+          id:
+            type: integer
+            example: 51
+          name:
+            type: string
+            example: Florencia
+          lastname:
+            type: string
+            example: Garcia
+          email:
+            type: string
+            format: email
+            example: florg@gmail.com
+
+          role:
+            type: string
+            example: admin
+          password:
+            type: string
+            example: jhgjjfgsejgjd
+  parameters:
+    filter:
+        in: query
+        name: filter
+        description: pass an optional search string for looking up list
+        required: false
+        schema:
+          type: string
+        allowEmptyValue: true
+        examples:
+          by on parameter:
+            summary: searching by one parameter as lastname or fullname, country, company, etc
+            value: [Soria]
+          by multiple parameters:
+            summary: searching by multiple parameters, as country and company 
+            value: [Argentina, Globant]
+    userId:
+        in: path
+        name: ContactId
+        description: pass a contact id in path to look up an account
+        required: true
+        schema:
+          type: integer
+        allowEmptyValue: false
+    companyId:
+        in: path
+        name: CompanyId
+        description: pass a company id in path to look up an account
+        required: true
+        schema:
+          type: integer
+        allowEmptyValue: false
+    regionId:
+        in: path
+        name: RegionId
+        description: pass a region id in path to look up an account
+        required: true
+        schema:
+          type: integer
+        allowEmptyValue: false       
+    cityId:
+        in: path
+        name: CityId
+        description: pass a city id in path to look up an account
+        required: true
+        schema:
+          type: integer
+        allowEmptyValue: false
+    countryId:
+        in: path
+        name: CountryId
+        description: pass a country id in path to look up an account
+        required: true
+        schema:
+          type: integer
+        allowEmptyValue: false    

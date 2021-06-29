@@ -1,0 +1,66 @@
+Html Webpack Plugin:
+<pre>
+  Error: html-webpack-plugin could not minify the generated output.
+  In production mode the html minifcation is enabled by default.
+  If you are not generating a valid html output please disable it manually.
+  You can do so by adding the following setting to your HtmlWebpackPlugin config:
+  |
+  |    minify: false
+  |
+  See https://github.com/jantimon/html-webpack-plugin#options for details.
+  For parser dedicated bugs please create an issue here:
+  https://danielruf.github.io/html-minifier-terser/
+  Parse Error: <form id="company-form" class="mt-5 mb-5 ps-5 pe-5 form-signin needs-vali  dation modal-form" novalidate">
+                    <input type="text" class="form-control mb-2 mt-2" id="company-name"   placeholder="Compañia" required/>
+                    <input type="email" class="form-control mb-2 mt-2" id="company-email  " placeholder="Email" required/>
+                    <input type="text" class="form-control mb-2 mt-2" id="company-phone"   placeholder="Teléfono"/>
+                    <select class="form-select-lg mb-2 mt-2 regions" id="c-region"></sel  ect>
+                    <select class="form-select-lg mb-2 mt-2 countries" id="c-country" di  sabled></select>
+                    <select class="form-select-lg mb-2 mt-2 cities" id="c-city" disabled  ></select>
+                    <input type="text" class="form-control mb-2 mt-2" id="comp-adress" p  laceholder="Dirección" required/>
+                  </form>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="cancel-btn btn btn-secondary" data-dismis  s="modal" data-bs-dismiss="modal" aria-label="Close">
+                    Cancelar
+                  </button>
+                  <button type="submit" id="save-company-btn" class="btn btn-primary">
+                    Guardar
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      <!--BOOTSTRAP 5 SCRIPTS-->
+      <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min  .js" integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8  p" crossorigin="anonymous"></script>
+      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.min.js  " integrity="sha384-Atwg2Pkwv9vp0ygtn1JAojH0nYbwNJLPhwyoVbhoPwBhjQPR5VtM2+xf0Uwh9KtT"   crossorigin="anonymous"></script>
+      <!--CUSTOM SCRIPTS-->
+      <script type="module" src="./scripts/app.js"></script>
+    </body>
+  </html>
+  
+  - htmlparser.js:244 new HTMLParser
+    [DW 3rd Proyect]/[html-minifier-terser]/src/htmlparser.js:244:13
+  
+  - htmlminifier.js:993 minify
+    [DW 3rd Proyect]/[html-minifier-terser]/src/htmlminifier.js:993:3
+  
+  - htmlminifier.js:1354 Object.exports.minify
+    [DW 3rd Proyect]/[html-minifier-terser]/src/htmlminifier.js:1354:16
+  
+  - index.js:1049 minifyHtml
+    [DW 3rd Proyect]/[html-webpack-plugin]/index.js:1049:46
+  
+  - index.js:479 postProcessHtml
+    [DW 3rd Proyect]/[html-webpack-plugin]/index.js:479:35
+  
+  - index.js:340 
+    [DW 3rd Proyect]/[html-webpack-plugin]/index.js:340:22
+  
+  - runMicrotasks
+  
+  - task_queues.js:93 processTicksAndRejections
+    internal/process/task_queues.js:93:5
+  
+</pre>
