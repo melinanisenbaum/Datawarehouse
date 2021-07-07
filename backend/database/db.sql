@@ -29,9 +29,10 @@ CREATE TABLE IF NOT EXISTS auths (
     userId INT DEFAULT NULL,
     createAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (authId),
-    KEY (userId),
-    CONSTRAINT auths_fk_1 FOREIGN KEY (userId) REFERENCES users (userId) ON DELETE SET NULL ON UPDATE CASCADE
+    KEY (userId)
 );
+ALTER TABLE auths DROP FOREIGN KEY auths_fk_1;
+ALTER TABLE auths ADD FOREIGN KEY (userId) REFERENCES users (userId) ON DELETE CASCADE ON UPDATE CASCADE;
     
 CREATE TABLE IF NOT EXISTS regions (
 	regionId INT NOT NULL AUTO_INCREMENT,
@@ -39,14 +40,15 @@ CREATE TABLE IF NOT EXISTS regions (
     PRIMARY KEY (regionId)
 );
 
+
 CREATE TABLE IF NOT EXISTS countries (
 	countryId INT NOT NULL AUTO_INCREMENT,
     count_name VARCHAR(45) NOT NULL,
     regionId INT,
     PRIMARY KEY (countryId),
-    KEY (regionId),
-    CONSTRAINT countries_fk_1 FOREIGN KEY (regionId) REFERENCES regions (regionId) ON DELETE SET NULL ON UPDATE CASCADE
+    KEY (regionId)
 );
+ALTER TABLE countries ADD FOREIGN KEY (regionId) REFERENCES regions (regionId) ON DELETE CASCADE;
 
 CREATE TABLE IF NOT EXISTS cities (
 	cityId INT NOT NULL AUTO_INCREMENT,
@@ -54,9 +56,10 @@ CREATE TABLE IF NOT EXISTS cities (
     countryId INT,
     regionId INT,
     PRIMARY KEY (cityId),
-    KEY (countryId),
-    CONSTRAINT cities_fk_1 FOREIGN KEY (countryId) REFERENCES countries (countryId) ON DELETE SET NULL ON UPDATE CASCADE
+    KEY (countryId)
 );
+ALTER TABLE cities ADD FOREIGN KEY (countryId) REFERENCES countries (countryId) ON DELETE CASCADE;
+
 
 CREATE TABLE IF NOT EXISTS companies (
 	companyId INT NOT NULL AUTO_INCREMENT,
@@ -70,11 +73,11 @@ CREATE TABLE IF NOT EXISTS companies (
     PRIMARY KEY(companyId),
     KEY (cityId),
     KEY (countryId),
-    KEY (regionId),
-    CONSTRAINT companies_fk_1 FOREIGN KEY (cityId) REFERENCES cities (cityId),
-    CONSTRAINT companies_fk_2 FOREIGN KEY (countryId) REFERENCES countries (countryId) ON DELETE SET NULL ON UPDATE CASCADE,
-    CONSTRAINT companies_fk_3 FOREIGN KEY (regionId) REFERENCES regions (regionId) ON DELETE SET NULL ON UPDATE CASCADE
+    KEY (regionId)
 );
+ALTER TABLE companies ADD FOREIGN KEY (cityId) REFERENCES cities (cityId) ON DELETE SET NULL;
+ALTER TABLE companies ADD FOREIGN KEY (countryId) REFERENCES countries (countryId) ON DELETE SET NULL;
+ALTER TABLE regions ADD FOREIGN KEY (regionId) REFERENCES regions (regionId) ON DELETE SET NULL;
 
 CREATE TABLE IF NOT EXISTS channels (
 	channelId INT NOT NULL AUTO_INCREMENT,
@@ -109,12 +112,9 @@ CREATE TABLE IF NOT EXISTS contacts (
     KEY (companyId),
     KEY (regionId),    
     KEY (countryId),
-    KEY (cityId),
-    CONSTRAINT contacts_fk_1 FOREIGN KEY (companyId) REFERENCES companies (companyId),
-	CONSTRAINT contacts_fk_2 FOREIGN KEY (regionId) REFERENCES regions (regionId) ON DELETE SET NULL ON UPDATE CASCADE,
-    CONSTRAINT contacts_fk_3 FOREIGN KEY (countryId) REFERENCES countries (countryId) ON DELETE SET NULL ON UPDATE CASCADE,
-    CONSTRAINT contacts_fk_4 FOREIGN KEY (cityId) REFERENCES cities (cityId)
+    KEY (cityId)
 );
+ALTER TABLE contacts ADD FOREIGN KEY (companyId) REFERENCES companies (companyId) ON DELETE CASCADE;
    
 CREATE TABLE IF NOT EXISTS contact_channel (
 	ccId INT NOT NULL AUTO_INCREMENT,
@@ -125,10 +125,10 @@ CREATE TABLE IF NOT EXISTS contact_channel (
     PRIMARY KEY (ccId),
     KEY (channelId),
     KEY (contactId),
-    KEY (prefId),
-	CONSTRAINT contact_channel_fk_1 FOREIGN KEY (contactId) REFERENCES contacts (contactId),
-	CONSTRAINT contacts_channel_fk_2 FOREIGN KEY (prefId) REFERENCES preference (prefId)
+    KEY (prefId)
 );
+ALTER TABLE contact_channel ADD FOREIGN KEY (prefId) REFERENCES preference (prefId) ON DELETE SET NULL;
+ALTER TABLE contact_channel ADD FOREIGN KEY (contactId) REFERENCES contacts (contactId) ON DELETE CASCADE;
 
 CREATE TABLE IF NOT EXISTS preference (
 	prefId INT NOT NULL AUTO_INCREMENT,

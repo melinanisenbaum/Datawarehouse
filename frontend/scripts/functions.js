@@ -2,7 +2,6 @@ import ContactsService from '../services/ContactsService.js';
 const contactsService = new ContactsService();
 
 class Functions {
-
  
   renderMessage(message, color, _container) {
     const alert = document.createElement('span');
@@ -19,11 +18,11 @@ class Functions {
     if(color == "alert-success") {
       icon.className = 'bi bi-check-circle pe-2'
     }
-
     _container.appendChild(alert);
+
     setTimeout(() => {
       _container.querySelector('.message').remove();
-    }, 2500);
+    }, 3000);
   }
 
   renderSelect(list, id, name, container) {//no me toma estos parametros
@@ -35,7 +34,9 @@ class Functions {
       container.appendChild(_option);
     });
   }
+  
   getContactData() {
+    const channelsTbody = document.getElementById('channels-tbody');
     const _comp = document.getElementById('company-select');
     const _lastname = document.getElementById('contact-lastname').value;
     const _name = document.getElementById('contact-name').value;
@@ -47,15 +48,15 @@ class Functions {
     const _city = document.getElementById('contact-city-select').value;
     const _adress = document.getElementById('contact-adress').value;
     const _interest = document.getElementById('interest').value;
-    const _channelsData = document.querySelectorAll('.channel-row');
+    const _channelsData = channelsTbody.querySelectorAll('.channel-row');
     
     const _channels = [];
     
     _channelsData.forEach (_chanrow => {
         _channels.push({
-            channelId: _chanrow.querySelector('.channel').value,
-            account: _chanrow.querySelector('.account').value,
-            preferenceId: _chanrow.querySelector('.pref').value,
+            channelId: _chanrow.querySelector('.channel').id,
+            account: _chanrow.querySelector('.account').innerText,
+            preferenceId: _chanrow.querySelector('.pref').id,
         });
     })
     
@@ -124,6 +125,7 @@ class Functions {
         );
       }
     }
+    
 
     
   //keyTimer(event, function1, function2){//llamar funciones como callbacks

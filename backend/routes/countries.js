@@ -45,10 +45,10 @@ router.post(
         } else {
             await _sequelize.query(
             'INSERT INTO countries (count_name, regionId) VALUES (:count_name, :regionId)',
-            { 
-                replacements: { count_name, regionId },
-                type: QueryTypes.INSERT,
-            }
+                { 
+                    replacements: { count_name, regionId },
+                    type: QueryTypes.INSERT,
+                }
             );
             res.status(200).send({ message: 'The item has been saved'});
         }

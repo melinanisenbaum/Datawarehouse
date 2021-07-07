@@ -39,7 +39,6 @@ router.post(
   body('lastname').not().isEmpty().trim().escape(),
   body('adress').not().isEmpty().trim().escape(),
   body('email').isEmail().normalizeEmail(),
-  //body('role').not().isEmpty().isInt(),
   body('passwd').isLength({ min: 8 }),
   async function createUser(req, res) {
     const errors = validationResult(req);

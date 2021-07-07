@@ -16,7 +16,7 @@ const countriesService = new CountriesService();
 const companiesService = new CompaniesService();
 const citiesService = new CitiesService();
 const functions = new Functions();
-const delRegionAlertContainer = document.getElementById("del-contact-alert-cont");
+const delRegionAlertContainer = document.getElementById('del-region-alert-cont');
 const alertContainer = document.getElementById('user-alert-container');
 const appContainer = document.getElementById('app-container');
 const contactsBody = document.getElementById('contacts-body');
@@ -28,11 +28,14 @@ const deleteItem = document.getElementById('delete-item-alert');
 const divider = document.getElementById('divider');
 const editItem = document.getElementById('edit-item-alert');
 const existingItem = document.getElementById('existing-item-alert');
+const input = document.getElementById('region-modal-input');
 const loginContainer = document.getElementById('login-container');
+const loginAlertContainer = document.getElementById('login-alert-container');
 const navTabs = document.getElementById('nav-tabs');
 const passwdRepeat = document.getElementById('passwd-repeat');
 const regionSelect = document.getElementById('region-select');
-const regionAlertContainer = document.querySelectorAll('region-alert-container');
+const regionModal = document.getElementById('region-modal');
+const regionAlertContainer = document.getElementById('region-alert-container');
 const _countriesSelects = document.querySelectorAll('.countries');
 const _citiesSelects = document.querySelectorAll('.cities');
 const successItem = document.getElementById('new-item-alert');
@@ -44,6 +47,7 @@ const userForm = document.getElementById('user-form');
 const userPasswd = document.getElementById('user-passwd');
 const usersTable = document.getElementById('users-table');
 const regionForm = document.getElementById('region-form');
+
 
 class UI {//es la clase que interactua con el navegador
   //LOGIN
@@ -72,24 +76,20 @@ class UI {//es la clase que interactua con el navegador
       }
 
       this.renderContacts();
-      
-    //  _regionSelects.forEach( _select => {
-      //  this.renderRegions(_select);
-     // });
     }
     if (loginUser.status === 400) {
       functions.renderMessage(
         "Usuario y/o contraseña inválidos!", 
         "alert-danger", 
-        document.getElementById('login-form')
+        loginAlertContainer
       );
     }
   }
   
   //CONTACTOS
-  async renderContacts() {
+  async renderContacts(q) {
     contactsBody.innerHTML = '';
-    const _array = await contactsService.getContacts();
+    const _array = await contactsService.getContacts(q);
 
     _array.forEach(element => {
       const _row = document.createElement('tr');
@@ -114,23 +114,42 @@ class UI {//es la clase que interactua con el navegador
       contactsBody.appendChild(_row);
     });
   }
-
-  closeTags() {
-    divider.classList.add('d-none');
-    divider.classList.remove('d-block');
-    tagsContainer.classList.add('d-none');
-    tagsContainer.classList.remove('d-block');
-  }
-  
-  async filteredResults(e) {
+ 
+  async showTags(e) {
     e.preventDefault();
     e.stopPropagation();
 
     const q = document.getElementById('search-input').value;
-    const _dataContacts = await contactsService.getContacts(q);
+    const _tags = await contactsService.getContacts(q);
 
-    functions.renderContacts(_dataContacts, contactsBody);
+    if (_tags.data.length > 0) {
+      divider.classList.remove('d-none');
+      tagsContainer.classList.remove('d-none');
+      //functions.renderTags(_tags, tagsContainer);------PREGUNTAR JUAN
+    } else {
+        divider.style.display = 'none';
+        tagsContainer.style.display = 'none';
+    }
   }
+  
+  renderTags(list, tagsContainer) {// preguntar a juan
+    tagsContainer.innerHTML = '';
+
+    list.forEach (contact => {
+      const li = document.createElement('li');
+      li.textContent = contact;/////?????
+      tagsContainer.appendChild(li);
+
+      li.addEventListener('click', (e) => {
+        document.getElementById('search-input').value = e.target.textContent;
+        this.renderContacts(e);
+        document.getElementById('divider').classList.add('d-none');
+        document.getElementById('tags-container').classList.add('d-none');
+      });
+    });
+  }
+
+
   async renderSelectCompanies() {
     const companySelect = document.getElementById('company-select');
     companySelect.innerHTML = '';
@@ -157,9 +176,9 @@ class UI {//es la clase que interactua con el navegador
     _row.id = `${_channelData.channelId}`;
     _row.className = 'channel-row bg-light';
     _row.innerHTML = `
-      <td>${_channelData.chan_name}</td>
-      <td>${_channelData.account}</td>
-      <td>${_channelData.pref_name}</td>
+      <td class="channel" id="${_channelData.channelId}">${_channelData.chan_name}</td>
+      <td class="account">${_channelData.account}</td>
+      <td class="pref" id=${_channelData.preferenceId}>${_channelData.pref_name}</td>
       <td>
         <button type="submit" _id="${_channelData.channelId}" class="btn btn-secondary edit-row">
           <i class="bi bi-pen"></i>
@@ -169,50 +188,68 @@ class UI {//es la clase que interactua con el navegador
         </button>
       </td>`;
     channelsTBody.appendChild(_row);
-    //document.getElementById('channel').reset();
-    //document.getElementById('account').reset();
-    //document.getElementById('pref').reset();
+
+
+    const deleteBtn = _row.querySelector('.delete-row');
+    deleteBtn.addEventListener('click', () => {
+      channelsTBody.removeChild(_row);
+    });
+
+    const editBtn = _row.querySelector('.edit-row');
+    editBtn.addEventListener('click', () => {
+      const chanSelect = document.getElementById('channel');
+      const prefSelect = document.getElementById('pref');
+  
+      channelsTBody.removeChild(_row);
+      chanSelect.options[chanSelect.selectedIndex].value = `${_channelData.channelId}`;//NO LO TOMA
+      document.getElementById('account').value = `${_channelData.account}`;
+      prefSelect.options[prefSelect.selectedIndex].value = `${_channelData.preferenceId}`;//NO LO TOMA
+    });
   }
 
   async renderEditContactModal(contactId) {
     const _data = await contactsService.getContact(contactId);
-    console.log(_data);
+    this.renderSelectCompanies();
+    this.renderRegions(document.getElementById('contact-region-select'));
 
-    document.getElementById('contact-lastname').value = _data.cont_lastname;
-    document.getElementById('contact_name').value = _data.cont_name;
-    document.getElementById('charge').value =_data.charge;
-    document.getElementById('contact-email').value =_data.email;
-    document.getElementById('company-select').options.getAttribute('value', _data.companyId);
-    document.getElementById('contact-adress').setAttribute('value', _data.adress);
-    document.getElementById('region-select').options.getAttribute('value', _data.regionId);
-    document.getElementById('country-select').options.getAttribute('innerHTML', _data.count_name);
-    document.getElementById('interest').value =_data.interest;
+    document.getElementById('contact-lastname').value = _data[0].cont_lastname;
+    document.getElementById('contact-name').value = _data[0].cont_name;
+    document.getElementById('charge').value =_data[0].charge;
+    document.getElementById('contact-email').value =_data[0].email;
+    document.getElementById('company-select').value = _data[0].companyId;
+    document.getElementById('contact-adress').value = _data[0].adress;
+    document.getElementById('region-select').setAttribute('value', _data[0].regionId);
+    //document.getElementById('country-select').options.getAttribute('innerHTML', _data[0].count_name);
+    //document.getElementById('city-select').options.getAttribute('innerHTML', _data[0].count_name);
+    document.getElementById('interest').value =_data[0].interest;
   }
+  // VOY POR ACA!
   
   async sendContact(newContact) {
     const result = await contactsService.postData(newContact);
     console.log(result);
 
-    if (result === 200) {
+    if (result.status === 200) {
+      //tengo que hacer que escrolee para arriba antes de mostrar el alert
       functions.renderMessage(
-        "La el contact ha sido registrado con éxito!", 
+        "El contacto ha sido registrado con éxito!", 
         "alert-success",
-        document.getElementById('contact-form')
+        document.getElementById('contact-alert-container')
       );
       this.renderContacts();
     }
-    if (result === 409) {
+    if (result.status === 409) {
       functions.renderMessage(
         "El contacto ya existe!", 
         "alert-danger",
-        document.getElementById('contact-form')
+        document.getElementById('contact-alert-container')
       );
     }
-    if (result === 400) {
+    if (result.status === 400) {
       functions.renderMessage(
         "Error de validacion de datos!", 
         "alert-danger",
-        document.getElementById('contact-form')
+        document.getElementById('contact-alert-container')
       );
     };
   }
@@ -253,7 +290,7 @@ class UI {//es la clase que interactua con el navegador
   }
   async deleteContact(contactId) {
     if (confirm('Are you sure to delete this record?')) {
-      const _result = await contactsService.deleteUser(userId);
+      const _result = await contactsService.deleteContact(contactId);
       if (_result === 200) {
         this.renderContacts();
       }
@@ -327,19 +364,19 @@ class UI {//es la clase que interactua con el navegador
 
     const result = await companiesService.putData(companyId, _data);
 
-    if (result === 200) {
+    if (result.status === 200) {
       functions.renderMessage(
         "La compañia ha sido modificado con éxito!", 
         "alert-success", 
-        document.getElementById('company-modal')
+        document.getElementById('company-alert-container')
       );
       this.renderUsersTable();
     }
-    if (result === 400) {
+    if (result.status === 400) {
       functions.renderMessage(
         "Error de validacion de datos!", 
         "alert-danger",
-        document.getElementById('company-modal')
+        document.getElementById('company-alert-container')
       );
     }
   }
@@ -347,27 +384,27 @@ class UI {//es la clase que interactua con el navegador
   async sendCompany(newCompany) {
     const result = await companiesService.postData(newCompany);
 
-    if (result === 200) {
-      functions.renderMessage(//no funciona el contenedor!!!!!!!
+    if (result.status === 200) {
+      functions.renderMessage(
         "La compañia ha sido registrado con éxito!", 
         "alert-success",
-        document.getElementById('after-alert')
+        document.getElementById('company-alert-container')
       );
       
       this.renderCompaniesTable();
     }
-    if (result === 409) {
+    if (result.status === 409) {
       functions.renderMessage(
         "La compaía ya existe!", 
         "alert-danger",
-        document.getElementById('company-form')
+        document.getElementById('company-alert-container')
       );
     }
-    if (result === 400) {
+    if (result.status === 400) {
       functions.renderMessage(
         "Error de validacion de datos!", 
         "alert-danger",
-        document.getElementById('company-form')
+        document.getElementById('company-alert-container')
       );
     };
   }
@@ -375,7 +412,12 @@ class UI {//es la clase que interactua con el navegador
   async deleteCompany(companyId) {
     if (confirm('Are you sure to delete this record?')) {
       const _result = await companiesService.deleteData(companyId);
-      if (_result === 200) {
+      if (_result.status === 200) {
+        functions.renderMessage(
+          "La compaia se ha eliminado", 
+          "alert-success",
+          document.getElementById('del-company-alert-cont')
+        );
         this.renderCompaniesTable();
       }
     }   
@@ -405,7 +447,7 @@ class UI {//es la clase que interactua con el navegador
     });
   }
 
-  async sendUser(_user) {//NO TOCAR NADA!
+  async sendUser(_user) {
     console.log(_user);
     const result = await usersService.postUser(_user);
     const alertContainer = document.getElementById('user-alert-container');
@@ -447,7 +489,6 @@ class UI {//es la clase que interactua con el navegador
 
     if (result === 200) {
       functions.renderMessage("El usuario ha sido modificado con éxito!", "alert-success", alertContainer);
-      userForm.reset();
       this.renderUsersTable();
     }
     if (result === 400) {
@@ -465,64 +506,115 @@ class UI {//es la clase que interactua con el navegador
   }
 
   //REGIONS TAB
+  
   async renderRegions(container) {
     const _countrySelect = container.parentNode.querySelector('.countries');
-    const _citySelect = container.parentNode.querySelector('.cities');
 
-    container.innerHTML = '';
     const regionsList = await regionsService.getData();
+    if (regionsList.length > 0) {
+      container.innerHTML = '';
+      regionsList.forEach(element => {
+        const regionOption = document.createElement('option');
+        const regionId = `${element.regionId}`;
+        regionOption.setAttribute('value', regionId);
+        regionOption.innerHTML = `${element.reg_name}`;
+        
+        container.appendChild(regionOption);
+      });
 
+      const firstRegion = container.firstChild.value;
+      console.log(firstRegion);
+      this.renderCountries(firstRegion, _countrySelect);
+
+    } else {
+      container.innerHTML = '';
+      const _selected =document.createElement('option');
+      _selected.innerText = `No regions available`;
+      container.appendChild(_selected);
+    }
+  }
+
+  async renderCountries(regionId, container) {
+    const _citySelect = container.parentNode.querySelector('.cities');
+    const countryList = await countriesService.getData(regionId);
+
+    if (countryList.length > 0) {
+      container.innerHTML = '';
+      countryList.forEach(element => {
+        const countryOption = document.createElement('option');
+        const countryId = `${element.countryId}`;
+        countryOption.setAttribute('value', countryId);
+        countryOption.innerText = `${element.count_name}`;
+            
+        container.appendChild(countryOption);
+      }); 
+    
+      const firstCountry = container.firstChild.value;
+      this.renderCities(firstCountry, _citySelect);
+
+    } else {
+      container.innerHTML = '';
+      const _selected =document.createElement('option');
+      _selected.innerText = `No countries available`;
+      container.appendChild(_selected);
+      container.parentNode.querySelector('.cities').innerHTML = '';
+    }
+  }
+
+  async renderCities(countryId, container) {
+    const _cities = await citiesService.getData(countryId);
+    
+    if (_cities.length > 0) {
+      container.innerHTML = '';
+      _cities.forEach( city => {
+        const option = document.createElement('option');
+        const cityId = `${city.cityId}`;
+        option.setAttribute('value', cityId);
+        option.innerText = `${city.city_name}`;
+          
+        container.appendChild(option);
+      });
+    } else {
+      container.innerHTML = '';
+      const _selected =document.createElement('option');
+      _selected.innerText = `No cities available`;
+      container.appendChild(_selected);
+    }
+  }
+  renderRegionModal(_place) {
+    input.value('placeholder', _place);
+    
+    input.addEventListener('focus', () => {
+      input.value = '';
+    });
+  }
+  async renderEditRegionModal(countryId) {
+    const result = await countriesService.getCountry(countryId);
+    const _data = result.data;
+    console.log(_data);
+    const country = {
+      name: _data.count_name,
+      region: _data.reg_name,
+      regId: _data.regionId 
+    }
+    const countName = regionModal.querySelector('input');
+    countName.value = country.name;
+    const selectRegion = regionModal.querySelector('.regions');
+    selectRegion.classList.remove('d-none');
+    selectRegion.innerHTML = '';
+    
+    const regionsList = await regionsService.getData();
+    
     regionsList.forEach(element => {
       const regionOption = document.createElement('option');
       const regionId = `${element.regionId}`;
       regionOption.setAttribute('value', regionId);
       regionOption.innerHTML = `${element.reg_name}`;
-      
-      container.appendChild(regionOption);
+
+      selectRegion.appendChild(regionOption);
     });
-
-    const firstRegion = regionSelect.firstChild.value;
-    this.renderCountries(firstRegion, countrySelect);
-  }
-
-  async renderCountries(regionId, container) {
-    container.innerHTML = '';
-    const countryList = await countriesService.getData(regionId);
-
-    countryList.forEach(element => {
-      const countryOption = document.createElement('option');
-      const countryId = `${element.countryId}`;
-      countryOption.setAttribute('value', countryId);
-      countryOption.innerText = `${element.count_name}`;
-        
-      container.appendChild(countryOption);
-    }); 
-
-    const firstCountry = countrySelect.firstChild.value;
-    this.renderCities(firstCountry, citySelect);
-
-}
-  async renderCities(countryId, container) {
-    container.innerHTML = '';
-    const _cities = await citiesService.getData(countryId);
- 
-    _cities.forEach( city => {
-      const option = document.createElement('option');
-      const cityId = `${city.cityId}`;
-      option.setAttribute('value', cityId);
-      option.innerText = `${city.city_name}`;
-        
-      container.appendChild(option);
-    });
-  }
-  renderRegionModal(_place) {
-    const formContainer = document.getElementById('form-container');
-    formContainer.innerHTML = ''
-    const input = document.createElement('input');
-    input.setAttribute('type', 'text');
-    input.setAttribute('placeholder', _place);
-    input.className = 'form-control';
-    formContainer.appendChild(input);
+    //const _selectedOption = country.regId; ESTOY TRABADA CON LOS EDIT!!!!!!!!!!!
+    selectRegion.setAttribute('selected', _selectedOption);
   }
 
   async sendRegion(item) {
@@ -534,6 +626,7 @@ class UI {//es la clase que interactua con el navegador
         "alert-success",
         regionAlertContainer
       );
+      this.renderRegions(regionSelect);
     }
     if (result === 409) {
       functions.renderMessage(
@@ -547,47 +640,52 @@ class UI {//es la clase que interactua con el navegador
   async sendCountry(item) {
     const result = await countriesService.postData(item);
 
+    if (result.status === 200) {
+      functions.renderMessage(
+        "El item ha sido registrado con éxito!", 
+        "alert-success",
+        regionAlertContainer
+      );
+      this.renderCountries(regionSelect.value, countrySelect);
+    }
+    if (result.status === 409) {
+      functions.renderMessage(
+        "El item ya existe!", 
+        "alert-danger", 
+        regionAlertContainer      
+      );
+    }
+  }
+  async sendCity(newCity) {
+    const result = await citiesService.postData(newCity);
+
     if (result === 200) {
       functions.renderMessage(
         "El item ha sido registrado con éxito!", 
         "alert-success",
         regionAlertContainer
       );
-    }
-    if (result === 409) {
-      functions.renderMessage(
-        "El item ya existe!", 
-        "alert-danger", 
-        regionAlertContainer      );
-    }
-  }
-  async sendCity(item) {
-    const result = await citiesService.postData(item);
-
-    if (result === 200) {
-      functions.renderMessage(
-        "El item ha sido registrado con éxito!", 
-        "alert-success",
-        regionAlertContainer      );
+      this.renderCities(countrySelect.value, citySelect);
     }
     if (result === 409) {
       functions.renderMessage(
         "El item ya existe!", 
         "alert-danger",
-        regionAlertContainer      );
+        regionAlertContainer
+      );
     }
   }
   async deleteRegion(regionId) {
     if (confirm('Are you sure to delete this record?')) {
       const response = await regionsService.deleteData(regionId);
-      if (response.status === 200) {
+      if (response === 200) {
         functions.renderMessage(
           "El item ha sido eliminado con éxito!", 
           "alert-success",
           delRegionAlertContainer
         );
+        this.renderRegions(regionSelect);
       }
-      this.renderRegions(regionSelect);
     }   
   }
 
@@ -601,7 +699,7 @@ class UI {//es la clase que interactua con el navegador
           delRegionAlertContainer
         );
       }
-      this.renderCountries(countriesSelect);
+      this.renderCountries(regionSelect.value, countrySelect);
     }   
   }
   async deleteCity(cityId) {
@@ -615,7 +713,7 @@ class UI {//es la clase que interactua con el navegador
           delRegionAlertContainer
         );
       }
-      this.renderCities(citiesSelect);
+      this.renderCities(citySelect);
     }   
   }
 }

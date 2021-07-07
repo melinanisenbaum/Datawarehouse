@@ -4,8 +4,8 @@ const mainService = new MainService();
 
 class ContactsService {
 
-    async getContacts() {
-        const response = await mainService.httpRequest('contacts', 'GET');
+    async getContacts(q) {
+        const response = await mainService.httpRequest('contacts', 'GET', q);
         const _dataTable = response.data;
         return _dataTable;
     }
@@ -16,14 +16,14 @@ class ContactsService {
     }
     async postData(newContact) {
         const response = await mainService.httpRequest('contacts', 'POST', newContact);
-        const _data = { status: response.status, data: await response.json()};
-        console.log(_data);
+        const _data = { status: response.status, data: await response.data};
+        //console.log(_data);
         return _data;
     }
     async putContact(contactId, _data) {
         const response = await mainService.httpRequest('contacts/' + contactId, 'PUT', _data);
         const result = response.status;
-        console.log(result);
+        //console.log(result);
         return result;
     }
     async deleteContact(contactId) {

@@ -19,15 +19,9 @@ class MainService {
                     method: method,
                     });
                     const result = { status: response.status, data: await response.json()};
+                    console.log(result);
                     return result;
             } else {
-                //if(_uri == 'countries') {
-                  //  const region = _body;
-                    //region.regionId = parseInt(_body.regionId.value, 10);
-                    //body: region;
-                //} else {
-                  //  body: body
-                //}
                 const response = await fetch(`${this.URI}/${_uri}`, {
                     headers: {
                         'Content-Type': 'application/json',

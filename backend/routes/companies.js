@@ -55,9 +55,6 @@ router.post(
   body('email').isEmail().normalizeEmail(),
   body('phone').not().isEmpty().trim().escape(),
   body('adress').not().isEmpty().trim().escape(),
-  body('cityId').not().isEmpty().trim().escape(),
-  body('countryId').not().isEmpty().trim().escape(),
-  body('regionId').not().isEmpty().trim().escape(),
   async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -65,14 +62,25 @@ router.post(
     };
     const { c_name, email, phone, adress, cityId, countryId, regionId } = req.body; 
     try {
-      await _sequelize.query(
-        'INSERT INTO companies (c_name, email, phone, adress, cityId, countryId, regionId) VALUES (:c_name, :email, :phone, :adress, :cityId, :countryId, :regionId)',
-        { 
-          replacements: { c_name, email, phone, adress, cityId, countryId, regionId },
-          type: QueryTypes.INSERT,
+      const alreadyExistCompany = await _sequelize.query(
+        'SELECT * FROM companies WHERE c_name = :c_name',
+        {
+          replacements: { c_name },
+          type: QueryTypes.SELECT,
         }
       );
-      res.status(200).send({ message: 'The item has been saved'});
+      if (alreadyExistCompany.length > 0) {
+          return res.status(409).send({ error: 'The item already exists!' }).end();
+      } else {
+        await _sequelize.query(
+          'INSERT INTO companies (c_name, email, phone, adress, cityId, countryId, regionId) VALUES (:c_name, :email, :phone, :adress, :cityId, :countryId, :regionId)',
+          { 
+            replacements: { c_name, email, phone, adress, cityId, countryId, regionId },
+            type: QueryTypes.INSERT,
+          }
+        );
+        res.status(200).send({ message: 'The item has been saved'});
+      }
     }
     catch (error) {
       console.log(error);

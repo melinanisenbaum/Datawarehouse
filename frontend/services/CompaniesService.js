@@ -18,19 +18,19 @@ class CompaniesService {
     async postData(item) {
         const response = await mainService.httpRequest('companies', 'POST', item);
         const _data = { status: response.status, data: await response.data};
-        console.log(_data);
+        //console.log(_data);
         return _data;
     }
     async putData(companyId, companyData) {
         const response = await mainService.httpRequest('companies/' + companyId, 'PUT', companyData);
         const _data = { status: response.status, data: await response.data};
-        console.log(_data);
+        //console.log(_data);
         return _data;
     }
     async deleteData(companyId) {
         const response = await mainService.httpRequest('companies/' + companyId, 'DELETE');
         const _data = { status: response.status, data: await response.data};
-        console.log(_data);
+        //console.log(_data);
         return _data;
     }
 }

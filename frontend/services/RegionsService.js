@@ -12,13 +12,13 @@ class RegionsService {
         console.log(newRegion);
         const response = await mainService.httpRequest('regions', 'POST', newRegion);
         const _data = response.status;
-        console.log(_data);
+        //console.log(_data);
         return _data;
     }
     async deleteData(regionId) {
         const response = await mainService.httpRequest('regions/' + regionId, 'DELETE');
         const _data = response.status;
-        console.log(_data);
+        //console.log(_data);
         return _data;
     }
 }

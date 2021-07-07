@@ -13,6 +13,7 @@ router.get('/', authToken, async (req, res) => {
       type: QueryTypes.SELECT
     }
   );
+  console.log(regions);
   if(regions !== null) {
     res.status(200).json(regions);
   } else {

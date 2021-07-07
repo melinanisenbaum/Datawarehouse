@@ -55,21 +55,31 @@ _btnLogin.addEventListener('click', e => {
 });
 
 //CONTACTOS
+const searchInput = document.getElementById('search-input');
 contactsTab.addEventListener('click', (e) => {
     e.preventDefault();
     e.stopPropagation();
 
     ui.renderContacts();
 });
+let _timer = null;
+const q = searchInput.value;
+const searchBtn = document.getElementById('search-btn');
+searchBtn.addEventListener('click', e => {
+    //clearTimeout(_timer);
+    console.log(q);
+    //if (e.key !== 'Enter') {
+      //  _timer = setTimeout( 
+            ui.renderContacts(q)
+        //     200
+        //);
+    //}
+});
+
 contactsTable.addEventListener('click', e => {
     e.preventDefault();
     if (e.target.classList.contains('delete')) {
-        console.log('deleted');
-      //  ui.deleteContact(e.target.getAttribute('_id'));
-    }
-    if (e.target.classList.contains('edit')) {
-        console.log('edited');
-        //ui.renderRegions(e.target.getAttribute('_id'));
+      ui.deleteContact(e.target.getAttribute('_id'));
     }
 });
 
@@ -77,11 +87,11 @@ addChannelBtn.addEventListener('click', e => {
     e.preventDefault();
     const chanSelect = document.getElementById('channel');
     const prefSelect = document.getElementById('pref');
-    const _channelId = chanSelect.options[chanSelect.selectedIndex].value;
-    const _chanName = chanSelect.options[chanSelect.selectedIndex].innerText;
-    const _account = document.getElementById('account').value;
-    const _prefId = prefSelect.options[prefSelect.selectedIndex].value;
-    const _prefName = prefSelect.options[prefSelect.selectedIndex].innerText;
+    let _channelId = chanSelect.options[chanSelect.selectedIndex].value;
+    let _chanName = chanSelect.options[chanSelect.selectedIndex].innerText;
+    let _account = document.getElementById('account').value;
+    let _prefId = prefSelect.options[prefSelect.selectedIndex].value;
+    let _prefName = prefSelect.options[prefSelect.selectedIndex].innerText;
 
     const _channelData = {
         channelId: _channelId,
@@ -92,20 +102,17 @@ addChannelBtn.addEventListener('click', e => {
     };
 
     ui.addChannelRow(_channelData);
-});
-channelsTbody.addEventListener('click', e => {
-    e.preventDefault();
-    const _row = e.target.parentNode.parentNode;
-    console.log(_row);
-    if (e.target.classList.contains('delete-row')) {
-        channelsTbody.deleteRow(_row);// NO FUNCIONA!!!!!!!!!!!!
-    }
+
 });
 
 contactModal.addEventListener('show.bs.modal', function (e) {
     const button = e.relatedTarget;
     const _function = button.getAttribute('data-bs-whatever');
     const modalTitle = contactModal.querySelector('.modal-title');
+    const prevRows = channelsTbody.querySelectorAll('tr');
+    prevRows.forEach( _row => {
+        channelsTbody.removeChild(_row);
+    })
     
     if (_function == "edit") {
         const contactId = button.getAttribute('_id');
@@ -120,13 +127,14 @@ contactModal.addEventListener('show.bs.modal', function (e) {
     }
     if (_function == "send") {
         modalTitle.textContent = 'Nuevo contacto';
+        ui.renderRegions(contactModal.querySelector('.regions'));
         ui.renderSelectCompanies();
         submitContactBtn.addEventListener('click', e => {
             e.preventDefault();
             e.stopPropagation();
             const newContact = functions.getContactData();
             ui.sendContact(newContact);
-        });
+        });//VOY POR ACA, NO ME TOMA LOS DATOS DE ALTA
     }   
 });
 
@@ -143,8 +151,10 @@ companyModal.addEventListener('show.bs.modal', function (e) {
     const _function = button.getAttribute('data-bs-whatever');
     const modalTitle = companyModal.querySelector('.modal-title');
     const submitCompanyBtn = document.getElementById('save-company-btn');
-    const reg_select = companyModal.querySelector('.regions');
-    
+    const reg_select = document.getElementById('c-region');
+    const count_select = document.getElementById('c-country');
+    const city_select = document.getElementById('c-city');
+
     ui.renderRegions(reg_select);
 
     if (_function == 'edit') {
@@ -223,20 +233,31 @@ usersTable.addEventListener('click', e => {
 });
 
 //TAB REGIONES
+const selectRegion = document.querySelectorAll('.regions');
+const selectCountry = document.querySelectorAll('.countries');
+
 regionsTab.addEventListener('click', (e) => {
     e.preventDefault();
     e.stopPropagation();
 
     ui.renderRegions(regionSelect);
 });
-regionSelect.addEventListener('change', e => {
-    const selectedRegion = e.target.value;
-    ui.renderCountries(selectedRegion, countrySelect);
+selectRegion.forEach(_select => {
+    _select.addEventListener('change', e => {
+        const selectedRegion = e.target.value;
+        const countryCont = e.target.parentNode.querySelector('.countries');//esto no reconoce el select
+        console.log(countryCont);
+        ui.renderCountries(selectedRegion, countryCont);
+    });
 });
-countrySelect.addEventListener('change', e => {
-    const selectedCountry = e.target.value;
-    ui.renderCities(selectedCountry, citySelect);
-});
+
+selectCountry.forEach(_select => {
+    _select.addEventListener('change', e => {
+        const selectedCountry = e.target.value;
+        const cityCont = e.target.parentNode.querySelector('.cities');
+        ui.renderCities(selectedCountry, cityCont);
+    });
+})
 deleteRegionBtn.addEventListener('click', e =>{
     e.preventDefault();
     const selectedRegion = regionSelect.value;
@@ -250,13 +271,12 @@ deleteCountryBtn.addEventListener('click', e =>{
 deleteCityBtn.addEventListener('click', e =>{
     e.preventDefault();
     const selectedCity = citySelect.value;
-    ui.deleteCountry(selectedCity);
+    ui.deleteCity(selectedCity);
 });
 regionModal.addEventListener('show.bs.modal', function (e) {
     const button = e.relatedTarget;
     const _function = button.getAttribute('data-bs-whatever');
     const modalTitle = regionModal.querySelector('.modal-title');
-    const _input = document.getElementById('region-form');
     const submitRegionBtn = document.getElementById('submit-region-btn');
     
     if (_function == 'new-region') {
@@ -297,7 +317,7 @@ regionModal.addEventListener('show.bs.modal', function (e) {
             e.stopPropagation();
             const _regionId = regionSelect.value;
             const _countryId = countrySelect.value;
-            const newItem = regionModal.querySelector('input').value;
+            const newItem = document.getElementById('region-modal-input').value;
             var newCity = { 
                 city_name: newItem,
                 regionId: _regionId,
@@ -306,16 +326,25 @@ regionModal.addEventListener('show.bs.modal', function (e) {
             ui.sendCity(newCity);
         });
     }
-});
+    if (_function == 'edit-country') {
+        modalTitle.textContent = 'Editar País';
+        const countryId = countrySelect.value;
+        ui.renderEditRegionModal(countryId);
 
-citySelect.addEventListener('change', e => {
-    const selectedCity = e.target.value;
-    deleteCityBtn.addEventListener('click', e =>{
-        e.preventDefault();
-        ui.deleteCity(selectedCity);
-    });
-});
+        submitRegionBtn.addEventListener('click', e => {
+            e.preventDefault();
+            e.stopPropagation();
+            const _regionId = regionSelect.value;
+            const _value = regionModal.querySelector('input').value;
+            var _country = { 
+                count_name: _value,
+                regionId: _regionId
+            }
+            ui.editCountry(_country);
+        });
+    }
 
+});
 
 
  

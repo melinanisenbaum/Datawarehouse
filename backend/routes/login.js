@@ -47,7 +47,7 @@ router.post('/', async(req, res) => {    //agregar middleware limiter
             const accessToken = jwt.sign(user, process.env.TOKENSECRET);//, {expiresIn: '30m'});
             const refreshToken = jwt.sign(user, process.env.REFRESH_TOKENSECRET);
             res.status(200);
-            res.json({ user, accessToken: accessToken, refreshToken: refreshToken });// se suele enviar el user para confirmar el is Admin por el front?
+            res.json({ user, accessToken: accessToken, refreshToken: refreshToken });// No esta habilitado
         }
     }
 });

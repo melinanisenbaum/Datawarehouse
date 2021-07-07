@@ -18,7 +18,7 @@ router.get('/countryId/:countryId', authToken, async (req, res) => {
     if(cities !== null) {        
         res.status(200).json(cities);
     } else {
-        res.status(400);
+        res.status(400).send({ message: 'No cities available'});
     }
 });
 
@@ -26,23 +26,32 @@ router.post(
     '/',
     authToken,
     body('city_name').not().isEmpty().trim().escape(),
-    body('countryId').not().isEmpty().trim().escape(),
-    body('regionId').not().isEmpty().trim().escape(),
     async (req, res) => {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
             return res.status(400).json({ errors: errors.array() });
         };
         const { city_name, countryId, regionId } = req.body; 
-        try { 
-            await _sequelize.query(
-                'INSERT INTO cities (city_name, countryId, regionId) VALUES (:city_name, :countryId, :regionId)',
-                { 
-                    replacements: { city_name, countryId, regionId },
-                    type: QueryTypes.INSERT,
+        try {
+            const alreadyExistCity = await _sequelize.query(
+                'SELECT * FROM cities WHERE city_name = :city_name',
+                {
+                    replacements: { city_name },
+                    type: QueryTypes.SELECT
                 }
             );
-            res.status(200).send({ message: 'The item has been saved'});
+            if (alreadyExistCity.length > 0) {
+                res.status(409).send({ message: 'The city already Exist'}).end();
+            } else {
+                await _sequelize.query(
+                    'INSERT INTO cities (city_name, countryId, regionId) VALUES (:city_name, :countryId, :regionId)',
+                    { 
+                        replacements: { city_name, countryId, regionId },
+                        type: QueryTypes.INSERT,
+                    }
+                );
+                res.status(200).send({ message: 'The item has been saved'});
+            }
         }
         catch (error) {
             res.status(400).send({ message: 'DB constraint error', data: error.code });

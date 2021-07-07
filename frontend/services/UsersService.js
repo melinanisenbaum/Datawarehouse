@@ -17,13 +17,13 @@ class UsersService {
     async postUser(user) {
         const response = await mainService.httpRequest('users', 'POST', user);
         const result = response.status;
-        console.log(result);
+        //console.log(result);
         return result;
     }
     async putUser(userId, _data) {
         const response = await mainService.httpRequest('users/' + userId, 'PUT', _data);
         const result = response.status;
-        console.log(result);
+        //console.log(result);
         return result;
     }
     async deleteUser(userId) {

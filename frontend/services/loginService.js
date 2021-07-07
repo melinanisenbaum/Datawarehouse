@@ -7,7 +7,7 @@ class LoginService {
     async postLogin(user) {
         const response = await mainService.httpRequest('', 'POST', user);
         const result = { status: response.status, data: await response.data};
-        console.log(result);
+        //console.log(result);
         return result;
     }
 }
