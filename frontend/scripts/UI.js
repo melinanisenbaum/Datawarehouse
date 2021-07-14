@@ -6,7 +6,6 @@ import RegionsService from '../services/RegionsService.js';
 import CitiesService from '../services/CitiesService.js';
 import CountriesService from '../services/CountriesService.js';
 import Functions from './functions.js';
-//import { reset } from 'nodemon';
 
 const loginService = new LoginService();
 const usersService = new UsersService();
@@ -46,8 +45,10 @@ const userDelAlertCont = document.getElementById('del-user-alert-cont');
 const userForm = document.getElementById('user-form');
 const userPasswd = document.getElementById('user-passwd');
 const usersTable = document.getElementById('users-table');
-const regionForm = document.getElementById('region-form');
-
+const regionForm = document.getElementById('region-form');    
+const contN = document.getElementById('selected-contacts');
+const delContBtn = document.getElementById('delete-contacts-btn');
+let contacts = [];
 
 class UI {//es la clase que interactua con el navegador
   //LOGIN
@@ -87,16 +88,16 @@ class UI {//es la clase que interactua con el navegador
   }
   
   //CONTACTOS
-  async renderContacts(q) {
+  async renderContacts(s_term) {
     contactsBody.innerHTML = '';
-    const _array = await contactsService.getContacts(q);
+    const _array = await contactsService.getContacts(s_term);
 
     _array.forEach(element => {
       const _row = document.createElement('tr');
       _row.className = 'bg-light';
       _row.innerHTML = `
         <th scope="row">
-          <input type="checkbox">
+          <input class="checkbox" type="checkbox" value="${element.contactId}">
         </th>
         <td>${element.imgURL} ${element.cont_name} ${element.cont_lastname} <br> ${element.email}</td>
         <td>${element.count_name}/${element.reg_name}</td>
@@ -115,41 +116,54 @@ class UI {//es la clase que interactua con el navegador
     });
   }
  
-  async showTags(e) {
-    e.preventDefault();
-    e.stopPropagation();
-
-    const q = document.getElementById('search-input').value;
-    const _tags = await contactsService.getContacts(q);
-
-    if (_tags.data.length > 0) {
-      divider.classList.remove('d-none');
-      tagsContainer.classList.remove('d-none');
-      //functions.renderTags(_tags, tagsContainer);------PREGUNTAR JUAN
+  renderChecks(_checkbox) {
+    const boxes = document.querySelectorAll('.checkbox');
+    if (_checkbox.hasAttribute('checked')) {
+      _checkbox.removeAttribute('checked');// no funcionael principal!!!
+      contN.innerText = '';
+      for (var i = 0; i< boxes.length; i++) {
+        boxes[i].removeAttribute('checked');
+      }
+      delContBtn.classList.add('d-none')
     } else {
-        divider.style.display = 'none';
-        tagsContainer.style.display = 'none';
+      delContBtn.classList.remove('d-none');
+      _checkbox.setAttribute('checked', 'checked');
+      for (var i = 0; i< boxes.length; i++) {
+        boxes[i].setAttribute('checked', 'checked');
+        const contId = boxes[i].value;
+        contacts.push(contId);
+        contN.innerText = '';
+        contN.innerText = contacts.length + ' contactos';
+      }
     }
   }
-  
-  renderTags(list, tagsContainer) {// preguntar a juan
-    tagsContainer.innerHTML = '';
+  toggleCheck(check) {
+    const contId = check.value;
 
-    list.forEach (contact => {
-      const li = document.createElement('li');
-      li.textContent = contact;/////?????
-      tagsContainer.appendChild(li);
-
-      li.addEventListener('click', (e) => {
-        document.getElementById('search-input').value = e.target.textContent;
-        this.renderContacts(e);
-        document.getElementById('divider').classList.add('d-none');
-        document.getElementById('tags-container').classList.add('d-none');
-      });
-    });
+    if (check.hasAttribute('checked')) {
+      console.log(1);
+      check.removeAttribute('checked');
+      functions.removeContToDel(contId, contacts);
+    } else {
+      console.log(2);
+      //check.ckecked == true;
+      check.setAttribute('checked', 'checked');// no funciona!!!
+      functions.addContToDel(contId, contacts);
+    }
   }
+  async deleteContacts() {
+    if (confirm('Are you sure to delete this records?')) {
+      contacts.forEach( contact => {
 
-
+        //const response = await contactsService.deleteContact(contact);
+        //no le gusta esto no se por que!!!~!
+        if (response === 200) {
+          this.renderContacts();
+          delContBtn.classList.add('d-none');
+        };
+      });
+    }; 
+  }
   async renderSelectCompanies() {
     const companySelect = document.getElementById('company-select');
     companySelect.innerHTML = '';
@@ -189,6 +203,9 @@ class UI {//es la clase que interactua con el navegador
       </td>`;
     channelsTBody.appendChild(_row);
 
+    document.getElementById('account').value = '';
+    document.getElementById('channel').value = 1;
+    document.getElementById('pref').value = 1;
 
     const deleteBtn = _row.querySelector('.delete-row');
     deleteBtn.addEventListener('click', () => {
@@ -196,47 +213,52 @@ class UI {//es la clase que interactua con el navegador
     });
 
     const editBtn = _row.querySelector('.edit-row');
-    editBtn.addEventListener('click', () => {
-      const chanSelect = document.getElementById('channel');
-      const prefSelect = document.getElementById('pref');
-  
+    editBtn.addEventListener('click', () => {  
       channelsTBody.removeChild(_row);
-      chanSelect.options[chanSelect.selectedIndex].value = `${_channelData.channelId}`;//NO LO TOMA
-      document.getElementById('account').value = `${_channelData.account}`;
-      prefSelect.options[prefSelect.selectedIndex].value = `${_channelData.preferenceId}`;//NO LO TOMA
+      document.getElementById('channel').value = _row.id;
+      document.getElementById('account').value = _row.querySelector('.account').innerHTML;
+      document.getElementById('pref').value = _row.querySelector('.pref').id;
     });
   }
 
   async renderEditContactModal(contactId) {
     const _data = await contactsService.getContact(contactId);
-    this.renderSelectCompanies();
-    this.renderRegions(document.getElementById('contact-region-select'));
+    const contactData = _data.contactData;
+    const contactChannels = _data.contChannels;
 
-    document.getElementById('contact-lastname').value = _data[0].cont_lastname;
-    document.getElementById('contact-name').value = _data[0].cont_name;
-    document.getElementById('charge').value =_data[0].charge;
-    document.getElementById('contact-email').value =_data[0].email;
-    document.getElementById('company-select').value = _data[0].companyId;
-    document.getElementById('contact-adress').value = _data[0].adress;
-    document.getElementById('region-select').setAttribute('value', _data[0].regionId);
-    //document.getElementById('country-select').options.getAttribute('innerHTML', _data[0].count_name);
-    //document.getElementById('city-select').options.getAttribute('innerHTML', _data[0].count_name);
-    document.getElementById('interest').value =_data[0].interest;
+    document.getElementById('contact-lastname').value = contactData[0].cont_lastname;
+    document.getElementById('contact-name').value = contactData[0].cont_name;
+    document.getElementById('charge').value =contactData[0].charge;
+    document.getElementById('contact-email').value =contactData[0].email;
+    document.getElementById('company-select').value = contactData[0].companyId;
+    document.getElementById('contact-adress').value = contactData[0].adress;
+    document.getElementById('contact-region-select').value = contactData[0].regionId;
+    this.renderCountries(contactData[0].regionId, document.getElementById('contact-country-select'));
+    document.getElementById('contact-country-select').value = contactData[0].countryId;
+    this.renderCities(contactData[0].countryId, document.getElementById('contact-city-select'));
+    document.getElementById('contact-city-select').value = contactData[0].cityId;
+    document.getElementById('interest').value = contactData[0].interest;
+
+    if (contactChannels.length > 0) {
+      contactChannels.forEach( channel => {
+        console.log(channel);
+        this.addChannelRow(channel);
+      });
+    };
   }
-  // VOY POR ACA!
   
   async sendContact(newContact) {
     const result = await contactsService.postData(newContact);
-    console.log(result);
 
     if (result.status === 200) {
-      //tengo que hacer que escrolee para arriba antes de mostrar el alert
       functions.renderMessage(
         "El contacto ha sido registrado con éxito!", 
         "alert-success",
         document.getElementById('contact-alert-container')
       );
       this.renderContacts();
+      document.getElementById('contact-form').reset();
+      document.getElementById('channels-tbody').removeChild(document.getElementById('channels-tbody').querySelector('tr'));
     }
     if (result.status === 409) {
       functions.renderMessage(
@@ -260,33 +282,17 @@ class UI {//es la clase que interactua con el navegador
       const result = await contactsService.putchannels(contactId, _contact, _channels);//ver como paso a aca los canales
       if (result === 200) {
         functions.renderMessage(
-          "La compañia ha sido modificado con éxito!", 
+          "El contacto ha sido modificado con éxito!", 
           "alert-success",
           document.getElementById('user-form')
         );
         this.renderUsersTable();
+        document.getElementById('contact-form').reset();
       }
      
       
       //this.renderUsersTable();
     }
-    
-
-    if (result === 200) {
-      functions.renderMessage(
-        "La compañia ha sido modificado con éxito!", 
-        "alert-success",
-        document.getElementById('user-form')
-      );
-      this.renderUsersTable();
-    }
-    if (result === 400) {
-      functions.renderMessage(
-        "Error de validacion de datos!", 
-        "alert-danger",
-        document.getElementById('company-form')
-      );
-    }  
   }
   async deleteContact(contactId) {
     if (confirm('Are you sure to delete this record?')) {
@@ -325,22 +331,21 @@ class UI {//es la clase que interactua con el navegador
   }
   async renderEditCompanyModal(companyId) {
     const _data = await companiesService.getData(companyId);
-    const _regionSel = document.getElementById('c-region');
     const _countrySel = document.getElementById('c-country');
     const _citySel = document.getElementById('c-city');
 
     _countrySel.removeAttribute('disabled');
     _citySel.removeAttribute('disabled');
 
-    _data.forEach ( company => {
-      document.getElementById('company-name').setAttribute('value', company.c_name);
-      document.getElementById('company-email').setAttribute('value', company.email);
-      document.getElementById('company-phone').setAttribute('value', company.phone);
-      //_regionSel.options.item(company.regionId);
-      //_countrySel.value = company.countryId;
-      //_citySel.value = company.cityId;
-      document.getElementById('comp-adress').setAttribute('value', company.adress);
-    })
+      document.getElementById('company-name').setAttribute('value', _data[0].c_name);
+      document.getElementById('company-email').setAttribute('value', _data[0].email);
+      document.getElementById('company-phone').setAttribute('value', _data[0].phone);
+      document.getElementById('c-region').value = _data[0].regionId;
+      this.renderCountries(_data[0].regionId, document.getElementById('c-country'));
+      document.getElementById('c-country').value = _data[0].countryId;
+      this.renderCities(_data[0].countryId, document.getElementById('c-city'));
+      document.getElementById('c-city').value = _data[0].cityId;
+      document.getElementById('comp-adress').setAttribute('value', _data[0].adress);
   }
 
   async editCompany(companyId) {
@@ -371,6 +376,8 @@ class UI {//es la clase que interactua con el navegador
         document.getElementById('company-alert-container')
       );
       this.renderUsersTable();
+      document.getElementById('company-form').reset();
+
     }
     if (result.status === 400) {
       functions.renderMessage(
@@ -386,11 +393,11 @@ class UI {//es la clase que interactua con el navegador
 
     if (result.status === 200) {
       functions.renderMessage(
-        "La compañia ha sido registrado con éxito!", 
+        "La compañia ha sido registrada con éxito!", 
         "alert-success",
         document.getElementById('company-alert-container')
       );
-      
+      document.getElementById('company-form').reset();
       this.renderCompaniesTable();
     }
     if (result.status === 409) {
@@ -489,6 +496,7 @@ class UI {//es la clase que interactua con el navegador
 
     if (result === 200) {
       functions.renderMessage("El usuario ha sido modificado con éxito!", "alert-success", alertContainer);
+      userForm.reset();
       this.renderUsersTable();
     }
     if (result === 400) {
@@ -523,7 +531,7 @@ class UI {//es la clase que interactua con el navegador
       });
 
       const firstRegion = container.firstChild.value;
-      console.log(firstRegion);
+      //console.log(firstRegion);
       this.renderCountries(firstRegion, _countrySelect);
 
     } else {
@@ -582,39 +590,21 @@ class UI {//es la clase que interactua con el navegador
     }
   }
   renderRegionModal(_place) {
-    input.value('placeholder', _place);
+    input.setAttribute('placeholder', _place);
+    input.value = '';
     
-    input.addEventListener('focus', () => {
-      input.value = '';
-    });
   }
-  async renderEditRegionModal(countryId) {
+  async renderEditCountryModal(countryId) {
     const result = await countriesService.getCountry(countryId);
     const _data = result.data;
-    console.log(_data);
-    const country = {
-      name: _data.count_name,
-      region: _data.reg_name,
-      regId: _data.regionId 
-    }
     const countName = regionModal.querySelector('input');
-    countName.value = country.name;
-    const selectRegion = regionModal.querySelector('.regions');
-    selectRegion.classList.remove('d-none');
-    selectRegion.innerHTML = '';
-    
-    const regionsList = await regionsService.getData();
-    
-    regionsList.forEach(element => {
-      const regionOption = document.createElement('option');
-      const regionId = `${element.regionId}`;
-      regionOption.setAttribute('value', regionId);
-      regionOption.innerHTML = `${element.reg_name}`;
-
-      selectRegion.appendChild(regionOption);
-    });
-    //const _selectedOption = country.regId; ESTOY TRABADA CON LOS EDIT!!!!!!!!!!!
-    selectRegion.setAttribute('selected', _selectedOption);
+    countName.value = _data[0].count_name;
+  }
+  async renderEditCityModal(cityId) {
+    const result = await citiesService.getCity(cityId);
+    const _data = result.data;
+    const cityName = regionModal.querySelector('input');
+    cityName.value = _data[0].city_name;
   }
 
   async sendRegion(item) {
@@ -627,6 +617,10 @@ class UI {//es la clase que interactua con el navegador
         regionAlertContainer
       );
       this.renderRegions(regionSelect);
+      regionForm.reset();
+      input.addEventListener('focus', () => {
+        input.value = '';
+      });
     }
     if (result === 409) {
       functions.renderMessage(
@@ -646,7 +640,11 @@ class UI {//es la clase que interactua con el navegador
         "alert-success",
         regionAlertContainer
       );
+      regionForm.reset();
       this.renderCountries(regionSelect.value, countrySelect);
+      input.addEventListener('focus', () => {
+        input.value = '';
+      });
     }
     if (result.status === 409) {
       functions.renderMessage(
@@ -655,19 +653,24 @@ class UI {//es la clase que interactua con el navegador
         regionAlertContainer      
       );
     }
+    regionForm.reset();
   }
   async sendCity(newCity) {
     const result = await citiesService.postData(newCity);
 
-    if (result === 200) {
+    if (result.status === 200) {
       functions.renderMessage(
         "El item ha sido registrado con éxito!", 
         "alert-success",
         regionAlertContainer
       );
+      regionForm.reset();
       this.renderCities(countrySelect.value, citySelect);
+      input.addEventListener('focus', () => {
+        input.value = '';
+      });
     }
-    if (result === 409) {
+    if (result.status === 409) {
       functions.renderMessage(
         "El item ya existe!", 
         "alert-danger",
@@ -709,12 +712,43 @@ class UI {//es la clase que interactua con el navegador
         functions.renderMessage(
           "El item ha sido eliminado con éxito!", 
           "alert-success",
-          3000, 
           delRegionAlertContainer
         );
       }
       this.renderCities(citySelect);
     }   
+  }
+  async editCountry(countryId, data) {
+    const result = await countriesService.putData(countryId, data);
+
+    if (result.status === 200) {
+      functions.renderMessage(
+        "El item ha sido editado con éxito!", 
+        "alert-success",
+        regionAlertContainer
+      );
+      this.renderRegions(regionSelect);
+      regionForm.reset();
+    }
+    input.addEventListener('focus', () => {
+      input.value = '';
+    });
+  }
+  async editCity(cityId, data) {
+    const result = await citiesService.putData(cityId, data);
+
+    if (result.status === 200) {
+      functions.renderMessage(
+        "El item ha sido editado con éxito!", 
+        "alert-success",
+        regionAlertContainer
+      );
+      regionForm.reset();
+      this.renderRegions(regionSelect);
+    }
+    input.addEventListener('focus', () => {
+      input.value = '';
+    });
   }
 }
 

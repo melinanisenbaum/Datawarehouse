@@ -19,7 +19,7 @@ class MainService {
                     method: method,
                     });
                     const result = { status: response.status, data: await response.json()};
-                    console.log(result);
+                    //console.log(result);
                     return result;
             } else {
                 const response = await fetch(`${this.URI}/${_uri}`, {

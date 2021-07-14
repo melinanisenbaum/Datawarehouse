@@ -6,7 +6,9 @@ const { QueryTypes } = require('sequelize');
 const { authToken } = require('../auth/auth.js');
 
 router.get('/', authToken, async (req, res) => {
-    const _search = req.body.search;
+    const { search } = req.body;
+    console.log(req.body);
+    console.log(search);
     let _query = `SELECT
             contacts.contactId,
             contacts.imgURL,
@@ -26,20 +28,22 @@ router.get('/', authToken, async (req, res) => {
         INNER JOIN cities ON contacts.cityId = cities.cityId
         INNER JOIN companies ON contacts.companyId = companies.companyId`;
     let _options = {
-        type: QueryTypes.SELECT
+        type: QueryTypes.SELECT,
+        replacements: { search: `%${search}%` },
+        logging: console.log
     };
     
-    if (_search) {
-        _query += ` WHERE (contacts.cont_name LIKE '% + :search + %' 
-            OR contacts.cont_lastname LIKE '% + :search + %' 
-            OR regions.reg_name LIKE '% + :search + %'
-            OR companies.c_name LIKE '% + :search + %'
-            OR countries.count_name LIKE '% + :search + %'
-            OR cities.city_name LIKE '% + :search + %'
-            OR contacts.email LIKE '% + :search + %'
-            OR contacts.charge LIKE '% + :search + %')`;
+    if (search) {
+        _query += ` WHERE contacts.cont_name LIKE :search 
+            OR contacts.cont_lastname LIKE :search 
+            OR regions.reg_name LIKE :search
+            OR companies.c_name LIKE :search
+            OR countries.count_name LIKE :search
+            OR cities.city_name LIKE :search
+            OR contacts.email LIKE :search
+            OR contacts.charge LIKE :search`;
         
-        _options.push({ replacements: { _search } });
+        // fijarse como funciona con chile y ergentina
     }
 
     try{
@@ -49,7 +53,7 @@ router.get('/', authToken, async (req, res) => {
         res.status(200).json(data);
     } 
     catch(error) {
-        res.status(504).send({ message: 'Server error', data: error.code });
+        res.status(504).send({ message: error.message, data: error.code });
     }
   });
 
@@ -73,53 +77,43 @@ router.get('/', authToken, async (req, res) => {
         const { imgURL, cont_name, cont_lastname, charge, email, companyId, adress, interest, cityId, countryId, regionId, channels } = req.body; 
         //const imgPath = '../uploads/' + req.file.filename; ver video fazt add images con multer
         try {
-            console.log(1);
-            console.log(channels);
-            console.log(channels.lenght);
-            await _sequelize.query(
-                'INSERT INTO contacts (imgURL, cont_name, cont_lastname, charge, email, companyId, adress, interest, cityId, countryId, regionId) VALUES (:imgURL, :cont_name, :cont_lastname, :charge, :email, :companyId, :adress, :interest, :cityId, :countryId, :regionId)',
-                { 
-                    replacements: { imgURL, cont_name, cont_lastname, charge, email, companyId, adress, interest, cityId, countryId, regionId },
-                    type: QueryTypes.INSERT,
-                }
-            );
-            const contact = await _sequelize.query(
-                `SELECT * FROM contacts WHERE email = :email`,
+            const alreadyExistContact = await _sequelize.query(
+                'SELECT * FROM contacts WHERE email = :email',
                 {
-                    replacements: { email },
-                    type: QueryTypes.SELECT
+                  replacements: { email },
+                  type: QueryTypes.SELECT,
                 }
             );
-            const contactId = contact.contactId;
-
-            if (channels.lenght !== 0) {
-                console.log('aca voy');
-                channels.forEach( async (_chan) => {
-                    const channelId = _chan.channelId;
-                    const account = _chan.account;
-                    const preferenceId = _chan.preferenceId;
-                    try {
+            if (alreadyExistContact.length > 0) {
+                return res.status(409).send({ error: 'The contact already exists!' }).end();
+            } else {
+                const create = await _sequelize.query(
+                    'INSERT INTO contacts (imgURL, cont_name, cont_lastname, charge, email, companyId, adress, interest, cityId, countryId, regionId) VALUES (:imgURL, :cont_name, :cont_lastname, :charge, :email, :companyId, :adress, :interest, :cityId, :countryId, :regionId)',
+                    { 
+                        replacements: { imgURL, cont_name, cont_lastname, charge, email, companyId, adress, interest, cityId, countryId, regionId },
+                        type: QueryTypes.INSERT,
+                    }
+                );
+                if (channels.length !== 0) {
+                    const contactId = +create[0];
+                    channels.forEach( async (_chan) => {
+                        const channelId = _chan.channelId;
+                        const account = _chan.account;
+                        const prefId = _chan.preferenceId;
                         await _sequelize.query(
-                            'INSERT INTO contact_channels (channelId, contactId, account, preferenceId) VALUES (:channelId, :contactId, :account, :preferenceId)',
+                            'INSERT INTO contact_channel (channelId, contactId, account, prefId) VALUES (:channelId, :contactId, :account, :prefId)',
                             { 
-                                replacements: { channelId, contactId, account, preferenceId },
+                                replacements: { channelId, contactId, account, prefId },
                                 type: QueryTypes.INSERT,
                             }
                         );
-                        res.status(200).send({ message: 'Channels have been saved'}).end();
-                    }
-                    catch(error) {
-                            res.status(400).send({ message: 'DB error', data: error.data });
-                    }
-                });
-            } else {
+                    });
+                }
                 res.status(200).send({ message: 'The contact has been saved'});
             }
         }
         catch(error) {
-            console.log(4);
-            console.log('error de servidor');
-            res.status(400).send({ message: 'DB error', data: error.data });
+            res.status(400).send({ message: error.message, data: error.data });
         }
     }
 );
@@ -128,31 +122,55 @@ router.get('/:contactId', authToken, async (req, res) => {
     const contactId = +req.params.contactId;
 
     try {
-      const contactData = await _sequelize.query(
-        `SELECT
-        contacts.imgURL,
-        contacts.cont_name,
-        contacts.cont_lastname,
-        contacts.email,
-        contacts.interest,
-        contacts.adress,
-        contacts.charge,
-        cities.city_name,
-        countries.count_name,
-        regions.reg_name,
-        companies.c_name
-    FROM contacts
-    INNER JOIN countries ON contacts.countryId = countries.countryId
-    INNER JOIN regions ON contacts.regionId = regions.regionId
-    INNER JOIN cities ON contacts.cityId = cities.cityId
-    INNER JOIN companies ON contacts.companyId = companies.companyId
-    WHERE contactId = :contactId`, 
-        {
-          replacements: { contactId },
-          type: QueryTypes.SELECT
+        const contactData = await _sequelize.query(
+            `SELECT
+                contacts.imgURL,
+                contacts.cont_name,
+                contacts.cont_lastname,
+                contacts.email,
+                contacts.interest,
+                contacts.adress,
+                contacts.charge,
+                contacts.cityId,
+                contacts.regionId,
+                contacts.countryId,
+                contacts.companyId,
+                cities.city_name,
+                countries.count_name,
+                regions.reg_name,
+                companies.c_name
+            FROM contacts
+            INNER JOIN countries ON contacts.countryId = countries.countryId
+            INNER JOIN regions ON contacts.regionId = regions.regionId
+            INNER JOIN cities ON contacts.cityId = cities.cityId
+            INNER JOIN companies ON contacts.companyId = companies.companyId
+            WHERE contactId = :contactId`, 
+            {
+                replacements: { contactId },
+                type: QueryTypes.SELECT
+            }
+        );
+        const contChannels = await _sequelize.query(
+            `SELECT 
+                contact_channel.channelId,
+                contact_channel.prefId,
+                contact_channel.account,
+                channels.chan_name,
+                preference.pref_name
+            FROM contact_channel
+            INNER JOIN channels ON contact_channel.channelId = channels.channelId
+            INNER JOIN preference ON contact_channel.prefId = preference.prefId
+            WHERE contactId = :contactId`,
+            {
+                replacements: { contactId },
+                type: QueryTypes.SELECT
+            }
+        );
+        if (contChannels.length > 0) {
+            return res.status(200).json({ contactData, contChannels });
+        } else {
+            return res.status(200).json(contactData);
         }
-    );
-    return res.status(200).json(contactData);
     }
     catch (error){
         console.log(error);
@@ -183,32 +201,41 @@ router.get('/:contactId', authToken, async (req, res) => {
         const { imgURL, cont_name, cont_lastname, charge, email, companyId, phone, adress, interest, countryId, regionId, cityId } = req.body; 
         const contactId = +req.params.contactId;
         try {    
-        await _sequelize.query(
-            `UPDATE contacts SET imgURL = :imgURL, cont_name = :cont_name, cont_lastname = :cont_lastname, charge = :charge, email = :email, companyId = :companyId, phone = :phone, adress = :adress, interest = :interest, preferred_channel = :preferred_channel, countryId = :countryId, regionId = :regionId
-            WHERE contactId = :contactId`,
-            { 
-            replacements: { contactId, imgURL, cont_name, cont_lastname, charge, email, companyId, phone, adress, interest, preferred_channel, countryId, regionId },
-            type: QueryTypes.UPDATE,
-            }
-        );
-        res.status(200).send({ message: 'The update has been succesfull' });
-    }
-    catch (error) {
-        console.log(error);
-        res.status(404).send({ message: 'The contact does not exist'})
-    }  
+            await _sequelize.query(
+                `UPDATE contacts SET imgURL = :imgURL, cont_name = :cont_name, cont_lastname = :cont_lastname, charge = :charge, email = :email, companyId = :companyId, phone = :phone, adress = :adress, interest = :interest, preferred_channel = :preferred_channel, countryId = :countryId, regionId = :regionId
+                WHERE contactId = :contactId`,
+                { 
+                replacements: { contactId, imgURL, cont_name, cont_lastname, charge, email, companyId, phone, adress, interest, preferred_channel, countryId, regionId },
+                type: QueryTypes.UPDATE,
+                }
+            );
+            res.status(200).send({ message: 'The update has been succesfull' });
+        }
+        catch (error) {
+            console.log(error);
+            res.status(404).send({ message: 'The contact does not exist'})
+        }  
 });
 
 router.delete('/:contactId', authToken, async (req, res) => {
     const contactId = +req.params.contactId;
     try {  
-        await _sequelize.query(
+        const deleteContact = await _sequelize.query(
             `DELETE FROM contacts WHERE contactId = :contactId`,
             {
-            replacements: { contactId },
-            type: QueryTypes.DELETE,
+                replacements: { contactId },
+                type: QueryTypes.DELETE,
             }
-        )
+        );
+        if (deleteContact) {
+            await _sequelize.query(
+                `DELETE FROM contact_channel WHERE contactId = :contactId`,
+                {
+                    replacements: { contactId },
+                    type: QueryTypes.DELETE,
+                }
+            );
+        }          
         res.status(200). send({ message: 'The item has been deleted' });
     }
     catch (error) {

@@ -9,7 +9,7 @@ class RegionsService {
         return _data;
     }
     async postData(newRegion) {
-        console.log(newRegion);
+        //console.log(newRegion);
         const response = await mainService.httpRequest('regions', 'POST', newRegion);
         const _data = response.status;
         //console.log(_data);

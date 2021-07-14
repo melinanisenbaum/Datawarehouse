@@ -6,7 +6,7 @@ class CompaniesService {
     async getCompanies() {
         const response = await mainService.httpRequest('companies', 'GET');
         const _data = response.data;
-        console.log(_data);
+        //console.log(_data);
         return _data;
     }
     async getData(companyId) {

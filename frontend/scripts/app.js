@@ -19,7 +19,6 @@ const regionSelect = document.getElementById('region-select');
 const submitContactBtn = document.getElementById('submit-contact-btn');
 const usersTab = document.getElementById('users-tab');
 const usersTable = document.getElementById('users-table');
-const userForm = document.getElementById('user-form');
 const userModal = document.getElementById('user-modal');
 const regionsTab = document.getElementById('regions-tab');
 const regionModal = document.getElementById('region-modal');
@@ -62,26 +61,36 @@ contactsTab.addEventListener('click', (e) => {
 
     ui.renderContacts();
 });
-let _timer = null;
-const q = searchInput.value;
 const searchBtn = document.getElementById('search-btn');
 searchBtn.addEventListener('click', e => {
-    //clearTimeout(_timer);
-    console.log(q);
-    //if (e.key !== 'Enter') {
-      //  _timer = setTimeout( 
-            ui.renderContacts(q)
-        //     200
-        //);
-    //}
+    const q = searchInput.value;
+    let s_term = { search: q };
+    console.log(s_term);
+    ui.renderContacts(s_term);
 });
 
-contactsTable.addEventListener('click', e => {
+contactsTable.addEventListener('click', e => {// ver si esta bien cuando anden los checkbox
     e.preventDefault();
     if (e.target.classList.contains('delete')) {
       ui.deleteContact(e.target.getAttribute('_id'));
     }
+    if (e.target.classList.contains('checkbox')) {
+        console.log(e.target.getAttribute('value'));
+        ui.toggleCheck(e.target);
+    }
 });
+const mainCheck = document.getElementById('main-checkbox');
+mainCheck.addEventListener('click', e => {
+    e.preventDefault();
+    ui.renderChecks(mainCheck);
+});
+
+const deleteContactsBtn = document.getElementById('delete-contacts-btn');
+deleteContactsBtn.addEventListener('click', e => {
+    e.preventDefault();
+    ui.deleteContacts();
+})
+
 
 addChannelBtn.addEventListener('click', e => {
     e.preventDefault();
@@ -113,11 +122,14 @@ contactModal.addEventListener('show.bs.modal', function (e) {
     prevRows.forEach( _row => {
         channelsTbody.removeChild(_row);
     })
-    
+    ui.renderRegions(contactModal.querySelector('.regions'));
+    ui.renderSelectCompanies();
+
     if (_function == "edit") {
         const contactId = button.getAttribute('_id');
         modalTitle.textContent = 'Editar contacto';
         ui.renderEditContactModal(contactId);
+        
         submitContactBtn.addEventListener('click', e => {
             e.preventDefault();
             e.stopPropagation();
@@ -127,14 +139,12 @@ contactModal.addEventListener('show.bs.modal', function (e) {
     }
     if (_function == "send") {
         modalTitle.textContent = 'Nuevo contacto';
-        ui.renderRegions(contactModal.querySelector('.regions'));
-        ui.renderSelectCompanies();
         submitContactBtn.addEventListener('click', e => {
             e.preventDefault();
             e.stopPropagation();
             const newContact = functions.getContactData();
             ui.sendContact(newContact);
-        });//VOY POR ACA, NO ME TOMA LOS DATOS DE ALTA
+        });
     }   
 });
 
@@ -288,7 +298,7 @@ regionModal.addEventListener('show.bs.modal', function (e) {
             e.stopPropagation();
 
             const newItem = regionModal.querySelector('input').value;
-            var newRegion = { reg_name: newItem }
+            var newRegion = { reg_name: newItem };
             ui.sendRegion(newRegion);
         });
     }
@@ -312,9 +322,10 @@ regionModal.addEventListener('show.bs.modal', function (e) {
         modalTitle.textContent = 'Nueva ciudad';
         ui.renderRegionModal('Agregar ciudad');
 
-        submitRegionBtn.addEventListener('click', e => {
-            e.preventDefault();
-            e.stopPropagation();
+        submitRegionBtn.addEventListener('click', (e) => {
+            console.log('esto es post');
+            //e.preventDefault();
+            //e.stopPropagation();
             const _regionId = regionSelect.value;
             const _countryId = countrySelect.value;
             const newItem = document.getElementById('region-modal-input').value;
@@ -323,24 +334,49 @@ regionModal.addEventListener('show.bs.modal', function (e) {
                 regionId: _regionId,
                 countryId: _countryId
             }
+            console.log(newCity);
             ui.sendCity(newCity);
         });
     }
     if (_function == 'edit-country') {
         modalTitle.textContent = 'Editar País';
         const countryId = countrySelect.value;
-        ui.renderEditRegionModal(countryId);
+        ui.renderEditCountryModal(countryId);
 
         submitRegionBtn.addEventListener('click', e => {
             e.preventDefault();
             e.stopPropagation();
             const _regionId = regionSelect.value;
             const _value = regionModal.querySelector('input').value;
-            var _country = { 
+            var _data = { 
                 count_name: _value,
                 regionId: _regionId
             }
-            ui.editCountry(_country);
+            console.log(_data);
+            ui.editCountry(countryId, _data);
+        });
+    }
+    if (_function == 'edit-city') {
+        modalTitle.textContent = 'Editar Ciudad';
+        const cityId = citySelect.value;
+        console.log(citySelect.value);
+        ui.renderEditCityModal(cityId);
+
+        submitRegionBtn.addEventListener('click', e => {
+            console.log('esto es put');
+
+            e.preventDefault();
+            e.stopPropagation();
+            const _regionId = regionSelect.value;
+            const _countryId = countrySelect.value;
+            const _value = regionModal.querySelector('input').value;
+            var _data = { 
+                city_name: _value,
+                regionId: _regionId,
+                countryId: _countryId
+            }
+            console.log(_data);
+            ui.editCity(cityId, _data);
         });
     }
 

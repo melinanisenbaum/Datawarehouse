@@ -35,6 +35,9 @@ paths:
               application/json:
                 schema:
                   $ref: '#/components/schemas/arrayOfUsers'
+          '400':
+              description: server error
+              content:
     post:
       summary: Creates a new user
       operationId: createUser

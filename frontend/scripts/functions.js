@@ -1,9 +1,10 @@
-import ContactsService from '../services/ContactsService.js';
-const contactsService = new ContactsService();
+const contN = document.getElementById('selected-contacts');
+const delContBtn = document.getElementById('delete-contacts-btn');
 
 class Functions {
  
   renderMessage(message, color, _container) {
+    _container.innerHTML = '';
     const alert = document.createElement('span');
     const text = document.createTextNode(message);
     alert.className = 'alert align-items-center message ps-5 pe-5';
@@ -22,7 +23,7 @@ class Functions {
 
     setTimeout(() => {
       _container.querySelector('.message').remove();
-    }, 3000);
+    }, 5000);
   }
 
   renderSelect(list, id, name, container) {//no me toma estos parametros
@@ -77,7 +78,7 @@ class Functions {
     return _contact
     }
 
-    getCompanyData() {
+  getCompanyData() {
       const compRegion = document.getElementById('c-region').value;
       const compName = document.getElementById('company-name').value;
       const compEmail = document.getElementById('company-email').value;
@@ -96,9 +97,9 @@ class Functions {
           cityId: compCity
       };
       return newCompany;
-    }
+  }
 
-    getUserData() {
+  getUserData() {
       const _lastname = document.getElementById('lastname').value;
       const _name = document.getElementById('u-name').value;
       const _adress = document.getElementById('u-adress').value;
@@ -124,22 +125,28 @@ class Functions {
             document.getElementById('user-modal')
         );
       }
+  }
+  addContToDel(contId, contacts) {
+    contacts.filter(() => {return contacts != contId});//esto esta bien?
+    contN.innerText = '';
+    contN.innerText = contacts.length + ' contactos';
+    
+    if (contacts == []) {
+      delContBtn.classList.add('d-none');
     }
-    
 
-    
-  //keyTimer(event, function1, function2){//llamar funciones como callbacks
-    
-    //let _timer = null;
-    //clearTimeout(_timer);
+  }
+  removeContToDel(contId, contacts) {
 
-    //if (event.keyCode !== 13) {
-      //_timer = setTimeout(function() { function1 }, 200);
-    //}
-    //else {
-      //function2;
-    //}
-  //}
+    if (delContBtn.classList.contains('d-none')) {
+      delContBtn.classList.remove('d-none');
+    }
+    contacts.push(contId);
+    contN.innerText = '';
+    contN.innerText = contacts.length + ' contactos';
+
+  }
+
   insertRecord(user, _tBody) {
     const _row = document.createElement('tr');
     _row.className = 'bg-light';

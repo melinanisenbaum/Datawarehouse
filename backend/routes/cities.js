@@ -32,6 +32,7 @@ router.post(
             return res.status(400).json({ errors: errors.array() });
         };
         const { city_name, countryId, regionId } = req.body; 
+        console.log(req.body);
         try {
             const alreadyExistCity = await _sequelize.query(
                 'SELECT * FROM cities WHERE city_name = :city_name',
@@ -41,8 +42,10 @@ router.post(
                 }
             );
             if (alreadyExistCity.length > 0) {
+                console.log(alreadyExistCity);
                 res.status(409).send({ message: 'The city already Exist'}).end();
-            } else {
+            } 
+            if (alreadyExistCity.length == 0) {
                 await _sequelize.query(
                     'INSERT INTO cities (city_name, countryId, regionId) VALUES (:city_name, :countryId, :regionId)',
                     { 
@@ -79,18 +82,17 @@ router.put(
     '/:cityId',
     authToken,
     body('city_name').not().isEmpty().trim().escape(),
-    body('countryId').not().isEmpty().trim().escape(),
     async (req, res) => {
         const errors = validationResult(req);  
         if (!errors.isEmpty()) {
             return res.status(400).send({ message: 'The item could not been updated' });
         };
-        const { city_name, countryId } = req.body;
+        const { city_name, countryId, regionId } = req.body;
         const cityId = +req.params.cityId;
         await _sequelize.query(
-            `UPDATE cities SET city_name = :city_name, countryId = :countryId WHERE cityId = :cityId`,
+            `UPDATE cities SET city_name = :city_name, countryId = :countryId, regionId = :regionId WHERE cityId = :cityId`,
             { 
-            replacements: { city_name, countryId, cityId },
+            replacements: { city_name, countryId, regionId, cityId },
             type: QueryTypes.UPDATE,
             }
         );

@@ -21,25 +21,6 @@ const _sequelize = new Sequelize(
     }
   }
 );
-//_sequelize.sync();
-
-////sequelize.Channel.belongsToMany(sequelize.Contact);
-//sequelize.Contact.hasMany(sequelize.Channel, {as: 'preferred_channel', constraints: false});
-
-//sequelize.City.belongsToMany(sequelize.Contact);
-//sequelize.Contact.hasOne(sequelize.City, { foreignKey: 'cityId' });
-
-//sequelize.City.belongsToMany(sequelize.Company);
-//sequelize.Company.hasOne(sequelize.City, { foreignKey: 'cityId' });
-
-//sequelize.City.belongsTo(sequelize.Country, { foreignKey: 'cityId' });
-//sequelize.Country.hasMany(sequelize.City);
-
-//sequelize.Country.belongsTo(sequelize.Region, { foreignKey: 'countryId' });
-//sequelize.Region.hasMany(sequelize.Country);
-
-//sequelize.contact.belongsTo(sequelize.company, { foreignKey: 'contactId' });
-//sequelize.company.hasMany(sequelize.contact);
 
 module.exports = { _sequelize };
 

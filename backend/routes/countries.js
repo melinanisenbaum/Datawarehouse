@@ -32,7 +32,8 @@ router.post(
         if (!errors.isEmpty()) {
             return res.status(400).json({ errors: errors.array() });
         };
-        const { count_name, regionId } = req.body; 
+        const { count_name, regionId } = req.body;
+        console.log(req.body);
         const alreadyExistCountry = await _sequelize.query(
             'SELECT * FROM countries WHERE count_name = :count_name',
             {
@@ -40,17 +41,21 @@ router.post(
                 type: QueryTypes.SELECT,
             }
         );
+        console.log(alreadyExistCountry.length);
         if (alreadyExistCountry.length > 0) {
+            console.log('ya existe');
             return res.status(409).send({ error: 'The item already exists!' }).end();
         } else {
-            await _sequelize.query(
-            'INSERT INTO countries (count_name, regionId) VALUES (:count_name, :regionId)',
-                { 
-                    replacements: { count_name, regionId },
-                    type: QueryTypes.INSERT,
-                }
-            );
-            res.status(200).send({ message: 'The item has been saved'});
+            if (alreadyExistCountry.length == 0) {
+                await _sequelize.query(
+                    'INSERT INTO countries (count_name, regionId) VALUES (:count_name, :regionId)',
+                        { 
+                            replacements: { count_name, regionId },
+                            type: QueryTypes.INSERT,
+                        }
+                    );
+                    res.status(200).send({ message: 'The item has been saved'});        
+            }
         }
     }
 );

@@ -9,14 +9,20 @@ class CitiesService {
         //console.log(_data);
         return _data;
     }
+    async getCity(cityId) {
+        const response = await mainService.httpRequest('cities/' + cityId, 'GET');
+        const _data = { status: response.status, data: await response.data};
+        console.log(_data);
+        return _data;
+    }
     async postData(newCity) {
         const response = await mainService.httpRequest('cities', 'POST', newCity);
         const _data = { status: response.status, data: await response.data};
         //console.log(_data);
         return _data;
     }
-    async putData(item) {
-        const response = await mainService.httpRequest('cities', 'PUT', item);
+    async putData(cityId, data) {
+        const response = await mainService.httpRequest('cities/' + cityId, 'PUT', data);
         const _data = { status: response.status, data: await response.data};
         //console.log(_data);
         return _data;

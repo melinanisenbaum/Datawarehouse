@@ -4,10 +4,10 @@ const mainService = new MainService();
 
 class ContactsService {
 
-    async getContacts(q) {
-        const response = await mainService.httpRequest('contacts', 'GET', q);
-        const _dataTable = response.data;
-        return _dataTable;
+    async getContacts(s_term) {
+        const response = await mainService.httpRequest('contacts', 'GET', s_term);
+        const _data = response.data;
+        return _data;
     }
     async getContact(contactId) {
         const response = await mainService.httpRequest('contacts/' + contactId, 'GET');

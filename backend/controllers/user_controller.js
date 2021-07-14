@@ -1,7 +1,5 @@
 const rateLimit = require('express-rate-limit');//seguridad  
 const { validationResult } = require('express-validator');
-//const User = require('../models/user');
-//const Auth = require('../models/auth');
 const { _sequelize } = require('../config/database');
 const { QueryTypes } = require ('sequelize');
 

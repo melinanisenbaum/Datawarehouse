@@ -12,7 +12,7 @@ class CountriesService {
     async getCountry(countryId) {
         const response = await mainService.httpRequest('countries/' + countryId, 'GET');
         const _data = { status: response.status, data: await response.data};
-        console.log(response);
+        //console.log(response);
         return _data;
     }
 

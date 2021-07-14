@@ -49,7 +49,7 @@ CREATE TABLE IF NOT EXISTS countries (
     KEY (regionId)
 );
 ALTER TABLE countries ADD FOREIGN KEY (regionId) REFERENCES regions (regionId) ON DELETE CASCADE;
-
+   
 CREATE TABLE IF NOT EXISTS cities (
 	cityId INT NOT NULL AUTO_INCREMENT,
     city_name VARCHAR(45) NOT NULL,

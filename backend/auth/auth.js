@@ -1,4 +1,3 @@
-const { _sequelize } = require('../config/database');
 const jwt = require('jsonwebtoken');
 
 function authToken (req, res, next) {
