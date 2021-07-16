@@ -6,8 +6,7 @@ const { QueryTypes } = require('sequelize');
 const { authToken } = require('../auth/auth.js');
 
 router.get('/', authToken, async (req, res) => {
-    const { search } = req.body;
-    console.log(req.body);
+    const search = req.query.search;
     console.log(search);
     let _query = `SELECT
             contacts.contactId,
@@ -29,21 +28,19 @@ router.get('/', authToken, async (req, res) => {
         INNER JOIN companies ON contacts.companyId = companies.companyId`;
     let _options = {
         type: QueryTypes.SELECT,
-        replacements: { search: `%${search}%` },
+        replacements: { _search: `%${search}%` },
         logging: console.log
     };
     
     if (search) {
-        _query += ` WHERE contacts.cont_name LIKE :search 
-            OR contacts.cont_lastname LIKE :search 
-            OR regions.reg_name LIKE :search
-            OR companies.c_name LIKE :search
-            OR countries.count_name LIKE :search
-            OR cities.city_name LIKE :search
-            OR contacts.email LIKE :search
-            OR contacts.charge LIKE :search`;
-        
-        // fijarse como funciona con chile y ergentina
+        _query += ` WHERE contacts.cont_name LIKE :_search 
+            OR contacts.cont_lastname LIKE :_search  
+            OR regions.reg_name LIKE :_search 
+            OR companies.c_name LIKE :_search 
+            OR countries.count_name LIKE :_search 
+            OR cities.city_name LIKE :_search 
+            OR contacts.email LIKE :_search 
+            OR contacts.charge LIKE :_search `;        
     }
 
     try{

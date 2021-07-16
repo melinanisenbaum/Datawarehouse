@@ -97,7 +97,7 @@ class UI {//es la clase que interactua con el navegador
       _row.className = 'bg-light';
       _row.innerHTML = `
         <th scope="row">
-          <input class="checkbox" type="checkbox" value="${element.contactId}">
+          <input class="form-check-input checkbox" type="checkbox" value="${element.contactId}">
         </th>
         <td>${element.imgURL} ${element.cont_name} ${element.cont_lastname} <br> ${element.email}</td>
         <td>${element.count_name}/${element.reg_name}</td>
@@ -116,18 +116,21 @@ class UI {//es la clase que interactua con el navegador
     });
   }
  
-  renderChecks(_checkbox) {
+  renderChecks() {
     const boxes = document.querySelectorAll('.checkbox');
-    if (_checkbox.hasAttribute('checked')) {
-      _checkbox.removeAttribute('checked');// no funcionael principal!!!
+    const mainCheck = document.getElementById('main-checkbox');
+
+    if (mainCheck.hasAttribute('checked')) {
+      mainCheck.removeAttribute('checked');// no funcionael principal!!!
       contN.innerText = '';
       for (var i = 0; i< boxes.length; i++) {
         boxes[i].removeAttribute('checked');
       }
-      delContBtn.classList.add('d-none')
+      delContBtn.classList.add('d-none');
+      contacts = [];
     } else {
       delContBtn.classList.remove('d-none');
-      _checkbox.setAttribute('checked', 'checked');
+      mainCheck.setAttribute('checked', 'checked');
       for (var i = 0; i< boxes.length; i++) {
         boxes[i].setAttribute('checked', 'checked');
         const contId = boxes[i].value;

@@ -63,6 +63,7 @@ contactsTab.addEventListener('click', (e) => {
 });
 const searchBtn = document.getElementById('search-btn');
 searchBtn.addEventListener('click', e => {
+    console.log('click');
     const q = searchInput.value;
     let s_term = { search: q };
     console.log(s_term);
@@ -80,9 +81,9 @@ contactsTable.addEventListener('click', e => {// ver si esta bien cuando anden l
     }
 });
 const mainCheck = document.getElementById('main-checkbox');
-mainCheck.addEventListener('click', e => {
-    e.preventDefault();
-    ui.renderChecks(mainCheck);
+mainCheck.addEventListener('click', () => {
+    console.log('click');
+    ui.renderChecks();
 });
 
 const deleteContactsBtn = document.getElementById('delete-contacts-btn');
