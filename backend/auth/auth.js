@@ -7,7 +7,6 @@ function authToken (req, res, next) {
     }
     jwt.verify(token, process.env.TOKENSECRET, (err, user) => {
         if (err) {
-            console.log(err);
             return res.status(403).send({ message: 'Unauthorized request!' });
         } else {
             req.user = user;

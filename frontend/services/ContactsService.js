@@ -5,9 +5,16 @@ const mainService = new MainService();
 class ContactsService {
 
     async getContacts(q) {
-        const response = await mainService.httpRequest('contacts' + q, 'GET');
-        const _data = response.data;
-        return _data;
+        if (q == null){
+            const response = await mainService.httpRequest('contacts', 'GET');
+            const _data = response.data;
+            return _data;
+        }
+        if (q != null) {
+            const response = await mainService.httpRequest('contacts?search=' + q, 'GET');
+            const _data = response.data;
+            return _data;    
+        }
     }
     async getContact(contactId) {
         const response = await mainService.httpRequest('contacts/' + contactId, 'GET');

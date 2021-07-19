@@ -16,12 +16,10 @@ router.post('/', async(req, res) => {    //agregar middleware limiter
         }
     );   
     if( getUser.length === 0 ) {
-        console.log('No existo');
         res.status(400).send({ error: 'Email or password does not match!' }).end();
 
     }
     if( getUser.length != 0 ) {
-        console.log('existo');
 
         const id = getUser[0].userId;
         const auth_pass = await _sequelize.query(
@@ -35,7 +33,6 @@ router.post('/', async(req, res) => {    //agregar middleware limiter
         const result = bcrypt.compareSync(passwd, hash); 
 
         if (!result) {
-            console.log('Mal pass');
 
             return res.status(400).send({ error: 'Email or password does not match!' }).end();
         } else {

@@ -83,7 +83,6 @@ router.post(
       }
     }
     catch (error) {
-      console.log(error);
       res.status(400).send({ message: 'DB constraint error', data: error.data });
     }
   }

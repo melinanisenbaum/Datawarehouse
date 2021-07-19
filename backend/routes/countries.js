@@ -16,7 +16,6 @@ router.get('/regionId/:regionId', authToken, async (req, res) => {
         }
     );
     if(countries !== null) {
-        console.log(countries);
         res.status(200).json(countries);
     } else {
         res.status(400);
@@ -33,7 +32,6 @@ router.post(
             return res.status(400).json({ errors: errors.array() });
         };
         const { count_name, regionId } = req.body;
-        console.log(req.body);
         const alreadyExistCountry = await _sequelize.query(
             'SELECT * FROM countries WHERE count_name = :count_name',
             {
@@ -41,9 +39,7 @@ router.post(
                 type: QueryTypes.SELECT,
             }
         );
-        console.log(alreadyExistCountry.length);
         if (alreadyExistCountry.length > 0) {
-            console.log('ya existe');
             return res.status(409).send({ error: 'The item already exists!' }).end();
         } else {
             if (alreadyExistCountry.length == 0) {

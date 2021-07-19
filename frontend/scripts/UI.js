@@ -88,9 +88,9 @@ class UI {//es la clase que interactua con el navegador
   }
   
   //CONTACTOS
-  async renderContacts(s_term) {
+  async renderContacts(q) {
     contactsBody.innerHTML = '';
-    const _array = await contactsService.getContacts(s_term);
+    const _array = await contactsService.getContacts(q);
 
     _array.forEach(element => {
       const _row = document.createElement('tr');
@@ -121,7 +121,7 @@ class UI {//es la clase que interactua con el navegador
     const mainCheck = document.getElementById('main-checkbox');
 
     if (mainCheck.hasAttribute('checked')) {
-      mainCheck.removeAttribute('checked');// no funcionael principal!!!
+      mainCheck.removeAttribute('checked');
       contN.innerText = '';
       for (var i = 0; i< boxes.length; i++) {
         boxes[i].removeAttribute('checked');
@@ -129,43 +129,40 @@ class UI {//es la clase que interactua con el navegador
       delContBtn.classList.add('d-none');
       contacts = [];
     } else {
-      delContBtn.classList.remove('d-none');
+      if (delContBtn.classList.contains('d-none')) {
+        delContBtn.classList.remove('d-none');
+        contacts = [];  
+      }
       mainCheck.setAttribute('checked', 'checked');
       for (var i = 0; i< boxes.length; i++) {
-        boxes[i].setAttribute('checked', 'checked');
-        const contId = boxes[i].value;
-        contacts.push(contId);
-        contN.innerText = '';
-        contN.innerText = contacts.length + ' contactos';
+        if (boxes[i].hasAttribute('checked') == false){
+          boxes[i].setAttribute('checked', 'checked');
+          const contId = boxes[i].value;
+          contacts.push(contId);
+          contN.innerText = '';
+          contN.innerText = contacts.length + ' contactos';  
+        }
       }
     }
   }
-  toggleCheck(check) {
-    const contId = check.value;
+  checkContact(contact) {
+    const contId = contact.value;
 
-    if (check.hasAttribute('checked')) {
-      console.log(1);
-      check.removeAttribute('checked');
-      functions.removeContToDel(contId, contacts);
+    if (contact.hasAttribute('checked')) {
+      contact.removeAttribute('checked');
+      functions.removeContactsToDel(contId, contacts);
     } else {
-      console.log(2);
-      //check.ckecked == true;
-      check.setAttribute('checked', 'checked');// no funciona!!!
+      contact.setAttribute('checked', 'checked');
       functions.addContToDel(contId, contacts);
     }
   }
   async deleteContacts() {
-    if (confirm('Are you sure to delete this records?')) {
-      contacts.forEach( contact => {
-
-        //const response = await contactsService.deleteContact(contact);
-        //no le gusta esto no se por que!!!~!
-        if (response === 200) {
-          this.renderContacts();
-          delContBtn.classList.add('d-none');
-        };
-      });
-    }; 
+    const mainCheck = document.getElementById('main-check');
+    contacts.forEach( contact => {
+      this.deleteContact(contact);
+    });
+    delContBtn.classList.add('d-none');
+    mainCheck.removeAttribute('checked');
   }
   async renderSelectCompanies() {
     const companySelect = document.getElementById('company-select');
@@ -244,13 +241,13 @@ class UI {//es la clase que interactua con el navegador
 
     if (contactChannels.length > 0) {
       contactChannels.forEach( channel => {
-        console.log(channel);
         this.addChannelRow(channel);
       });
     };
   }
   
   async sendContact(newContact) {
+    const contactRegionSelect = document.getElementById('contact-region-select');
     const result = await contactsService.postData(newContact);
 
     if (result.status === 200) {
@@ -261,7 +258,10 @@ class UI {//es la clase que interactua con el navegador
       );
       this.renderContacts();
       document.getElementById('contact-form').reset();
-      document.getElementById('channels-tbody').removeChild(document.getElementById('channels-tbody').querySelector('tr'));
+      this.renderRegions(contactRegionSelect);
+      if (newContact.channels == []) {
+        document.getElementById('channels-tbody').removeChild(document.getElementById('channels-tbody').querySelector('tr'));
+      }
     }
     if (result.status === 409) {
       functions.renderMessage(
@@ -279,10 +279,10 @@ class UI {//es la clase que interactua con el navegador
     };
   }
 
-  async editContact(contactId, _contact, _channels) {// no esta terminado
+  async editContact(contactId, _contact, _channels) {
     const result = await contactsService.putData(contactId, _contact, _channels);
     if (result === 200) {
-      const result = await contactsService.putchannels(contactId, _contact, _channels);//ver como paso a aca los canales
+      const result = await contactsService.putchannels(contactId, _contact, _channels);
       if (result === 200) {
         functions.renderMessage(
           "El contacto ha sido modificado con éxito!", 
@@ -291,6 +291,7 @@ class UI {//es la clase que interactua con el navegador
         );
         this.renderUsersTable();
         document.getElementById('contact-form').reset();
+        this.renderRegions(contactRegionSelect);
       }
      
       
@@ -298,12 +299,10 @@ class UI {//es la clase que interactua con el navegador
     }
   }
   async deleteContact(contactId) {
-    if (confirm('Are you sure to delete this record?')) {
-      const _result = await contactsService.deleteContact(contactId);
-      if (_result === 200) {
-        this.renderContacts();
-      }
-    }   
+    const _result = await contactsService.deleteContact(contactId);
+    if (_result === 200) {
+      this.renderContacts();
+    }
   }
 //COMPANIAS 
   async renderCompaniesTable() {
@@ -380,7 +379,7 @@ class UI {//es la clase que interactua con el navegador
       );
       this.renderUsersTable();
       document.getElementById('company-form').reset();
-
+      this.renderRegions(document.getElementById('c-region'));
     }
     if (result.status === 400) {
       functions.renderMessage(
@@ -401,6 +400,7 @@ class UI {//es la clase que interactua con el navegador
         document.getElementById('company-alert-container')
       );
       document.getElementById('company-form').reset();
+      this.renderRegions(document.getElementById('c-region'));
       this.renderCompaniesTable();
     }
     if (result.status === 409) {
@@ -458,7 +458,6 @@ class UI {//es la clase que interactua con el navegador
   }
 
   async sendUser(_user) {
-    console.log(_user);
     const result = await usersService.postUser(_user);
     const alertContainer = document.getElementById('user-alert-container');
 
@@ -534,7 +533,6 @@ class UI {//es la clase que interactua con el navegador
       });
 
       const firstRegion = container.firstChild.value;
-      //console.log(firstRegion);
       this.renderCountries(firstRegion, _countrySelect);
 
     } else {
@@ -733,9 +731,6 @@ class UI {//es la clase que interactua con el navegador
       this.renderRegions(regionSelect);
       regionForm.reset();
     }
-    input.addEventListener('focus', () => {
-      input.value = '';
-    });
   }
   async editCity(cityId, data) {
     const result = await citiesService.putData(cityId, data);
@@ -749,9 +744,6 @@ class UI {//es la clase que interactua con el navegador
       regionForm.reset();
       this.renderRegions(regionSelect);
     }
-    input.addEventListener('focus', () => {
-      input.value = '';
-    });
   }
 }
 

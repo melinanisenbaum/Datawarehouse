@@ -32,7 +32,6 @@ router.post(
             return res.status(400).json({ errors: errors.array() });
         };
         const { city_name, countryId, regionId } = req.body; 
-        console.log(req.body);
         try {
             const alreadyExistCity = await _sequelize.query(
                 'SELECT * FROM cities WHERE city_name = :city_name',
@@ -42,7 +41,6 @@ router.post(
                 }
             );
             if (alreadyExistCity.length > 0) {
-                console.log(alreadyExistCity);
                 res.status(409).send({ message: 'The city already Exist'}).end();
             } 
             if (alreadyExistCity.length == 0) {

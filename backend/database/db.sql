@@ -48,8 +48,9 @@ CREATE TABLE IF NOT EXISTS countries (
     PRIMARY KEY (countryId),
     KEY (regionId)
 );
-ALTER TABLE countries ADD FOREIGN KEY (regionId) REFERENCES regions (regionId) ON DELETE CASCADE;
-   
+ALTER TABLE countries ADD FOREIGN KEY (regionId) REFERENCES regions (regionId) ON DELETE CASCADE ON UPDATE SET NULL;
+ALTER TABLE cities DROP FOREIGN KEY cities_ibfk_1;
+  
 CREATE TABLE IF NOT EXISTS cities (
 	cityId INT NOT NULL AUTO_INCREMENT,
     city_name VARCHAR(45) NOT NULL,
@@ -58,7 +59,7 @@ CREATE TABLE IF NOT EXISTS cities (
     PRIMARY KEY (cityId),
     KEY (countryId)
 );
-ALTER TABLE cities ADD FOREIGN KEY (countryId) REFERENCES countries (countryId) ON DELETE CASCADE;
+ALTER TABLE cities ADD FOREIGN KEY (countryId) REFERENCES countries (countryId) ON DELETE CASCADE ON UPDATE SET NULL;
 
 
 CREATE TABLE IF NOT EXISTS companies (

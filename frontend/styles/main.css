@@ -4,7 +4,6 @@
 body {
     font-family: 'Source Sans Pro', sans-serif;
 }
-
 .login-container {
     margin-top: 150px;
 }
@@ -20,4 +19,10 @@ input[type="search"]::-webkit-search-cancel-button,
 input[type="search"]::-webkit-search-results-button,
 input[type="search"]::-webkit-search-results-decoration {
     display: none;
+}
+input[type=checkbox]{
+	-webkit-appearance: none;
+	-moz-appearance:none;
+	-o-appearance:none;
+	-ms-appearance:none;
 }

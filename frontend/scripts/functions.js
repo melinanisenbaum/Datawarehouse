@@ -26,7 +26,7 @@ class Functions {
     }, 5000);
   }
 
-  renderSelect(list, id, name, container) {//no me toma estos parametros
+  renderSelect(list, id, name, container) {
     list.forEach(element => {
       const _option = document.createElement('option');
       _option.setAttribute('value', `${element.id}`);
@@ -127,7 +127,11 @@ class Functions {
       }
   }
   addContToDel(contId, contacts) {
-    contacts.filter(() => {return contacts != contId});//esto esta bien?
+    if (delContBtn.classList.contains('d-none')) {
+      delContBtn.classList.remove('d-none');
+    };
+    //contacts.filter(() => {return contacts != contId});//esto esta bien?
+    contacts.push(contId);
     contN.innerText = '';
     contN.innerText = contacts.length + ' contactos';
     
@@ -136,21 +140,37 @@ class Functions {
     }
 
   }
-  removeContToDel(contId, contacts) {
+  removeContactsToDel(contId, contacts) {
+    console.log(contacts);
+    this.removeItemFromArr(contacts, contId);
+    console.log(contacts);
 
+    contN.innerText = '';
+    contN.innerText = contacts.length + ' contactos';
+    if (contacts === []) {
+      delContBtn.classList.add('d-none');
+    }
+  }
+
+  removeItemFromArr ( arr, item ) {
+    var i = arr.indexOf( item );
+ 
+    if ( i !== -1 ) {
+        arr.splice( i, 1 );
+    }
+  }
+  addContactsToDel(contId, contacts) {
     if (delContBtn.classList.contains('d-none')) {
       delContBtn.classList.remove('d-none');
     }
     contacts.push(contId);
     contN.innerText = '';
     contN.innerText = contacts.length + ' contactos';
-
   }
 
   insertRecord(user, _tBody) {
     const _row = document.createElement('tr');
     _row.className = 'bg-light';
-    //cambiar EL ROL SE VE COMO  numero
     _row.innerHTML = `
       <td>${user.lastname}</td>
       <td>${user.name}</td>

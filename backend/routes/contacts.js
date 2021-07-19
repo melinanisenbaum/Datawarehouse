@@ -7,7 +7,6 @@ const { authToken } = require('../auth/auth.js');
 
 router.get('/', authToken, async (req, res) => {
     const search = req.query.search;
-    console.log(search);
     let _query = `SELECT
             contacts.contactId,
             contacts.imgURL,
@@ -67,7 +66,6 @@ router.get('/', authToken, async (req, res) => {
     async (req, res) => {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
-            console.log('error de verificacion de campos');
             return res.status(400).json({ errors: errors.array() });
             
         };
@@ -170,7 +168,6 @@ router.get('/:contactId', authToken, async (req, res) => {
         }
     }
     catch (error){
-        console.log(error);
         res.status(404).send({ message: 'The contact does not exist'})  }
   });
 
@@ -209,7 +206,6 @@ router.get('/:contactId', authToken, async (req, res) => {
             res.status(200).send({ message: 'The update has been succesfull' });
         }
         catch (error) {
-            console.log(error);
             res.status(404).send({ message: 'The contact does not exist'})
         }  
 });
@@ -236,7 +232,6 @@ router.delete('/:contactId', authToken, async (req, res) => {
         res.status(200). send({ message: 'The item has been deleted' });
     }
     catch (error) {
-        console.log(error);
         res.status(404).send({ message: 'The item does not exist', data: error.data})
     }
 });
