@@ -12,6 +12,9 @@ CREATE TABLE IF NOT EXISTS users (
     KEY (isAdmin),
     CONSTRAINT users_fk_1 FOREIGN KEY (isAdmin) REFERENCES rols (rolId)
 );
+INSERT INTO users
+VALUES 
+	(1, "Melina", "Dev", "melinanisenbaum@gmail.com", "cjgjfdhgbdf", 1);
 
 CREATE TABLE IF NOT EXISTS rols (
 	rolId INT NOT NULL,
@@ -31,9 +34,12 @@ CREATE TABLE IF NOT EXISTS auths (
     PRIMARY KEY (authId),
     KEY (userId)
 );
-ALTER TABLE auths DROP FOREIGN KEY auths_fk_1;
 ALTER TABLE auths ADD FOREIGN KEY (userId) REFERENCES users (userId) ON DELETE CASCADE ON UPDATE CASCADE;
-    
+
+INSERT INTO auths
+VALUES 
+	(1, "$2b$10$DeHaGn/JZ7Zmi6CSEn9SB.8t2Uuqt.KvV1i2GVUUgOGzym28yQQZO", 1, "2021-06-27 10:28:51");
+
 CREATE TABLE IF NOT EXISTS regions (
 	regionId INT NOT NULL AUTO_INCREMENT,
     reg_name VARCHAR(45) NOT NULL,
@@ -49,7 +55,6 @@ CREATE TABLE IF NOT EXISTS countries (
     KEY (regionId)
 );
 ALTER TABLE countries ADD FOREIGN KEY (regionId) REFERENCES regions (regionId) ON DELETE CASCADE ON UPDATE SET NULL;
-ALTER TABLE cities DROP FOREIGN KEY cities_ibfk_1;
   
 CREATE TABLE IF NOT EXISTS cities (
 	cityId INT NOT NULL AUTO_INCREMENT,

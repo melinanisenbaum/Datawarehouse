@@ -1,0 +1,6 @@
+https://melinanisenbaum.github.io/
+
+https://github.com/melinanisenbaum/Datawarehouse.git
+
+
+En el presente proyecto se opto por el modo freelance. No se realizaron las funcionalidades opcionales.
