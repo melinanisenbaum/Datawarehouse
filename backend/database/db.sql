@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS users (
 );
 INSERT INTO users
 VALUES 
-	(1, "Melina", "Dev", "melinanisenbaum@gmail.com", "cjgjfdhgbdf", 1);
+	(1, "Melina", "Dev", "melina@gmail.com", "cjgjfdhgbdf", 1);
 
 CREATE TABLE IF NOT EXISTS rols (
 	rolId INT NOT NULL,
