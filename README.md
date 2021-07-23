@@ -41,6 +41,7 @@ npm run start
 
 From the terminal located at the root of the project frontend, views:
 open index.html
+Default admin user: user: melina, password: 1234
 
 Step 6: Query the API
 If you do not have Postman installed, please go to this link
