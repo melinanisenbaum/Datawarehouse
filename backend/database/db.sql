@@ -14,7 +14,8 @@ CREATE TABLE IF NOT EXISTS users (
 );
 INSERT INTO users
 VALUES 
-	(1, "Melina", "Dev", "melinanisenbaum@gmail.com", "cjgjfdhgbdf", 1);
+	(1, "Melina", "Dev", "melina@gmail.com", "cjgjfdhgbdf", 1),
+    (2, "juan", "user", "juan@juan.com", "cjgjfdhgbdf", 0);
 
 CREATE TABLE IF NOT EXISTS rols (
 	rolId INT NOT NULL,
@@ -38,7 +39,8 @@ ALTER TABLE auths ADD FOREIGN KEY (userId) REFERENCES users (userId) ON DELETE C
 
 INSERT INTO auths
 VALUES 
-	(1, "$2b$10$DeHaGn/JZ7Zmi6CSEn9SB.8t2Uuqt.KvV1i2GVUUgOGzym28yQQZO", 1, "2021-06-27 10:28:51");
+	(1, "$2b$10$DeHaGn/JZ7Zmi6CSEn9SB.8t2Uuqt.KvV1i2GVUUgOGzym28yQQZO", 1, "2021-06-27 10:28:51"),
+    (2, '$2b$10$Lv3XENY0Gk8ekUTGPuOONuYU2kgsX9k4S4yK4ilQy9MhLfI.xDHAK', 2, "2021-07-23 10:46:24");
 
 CREATE TABLE IF NOT EXISTS regions (
 	regionId INT NOT NULL AUTO_INCREMENT,
